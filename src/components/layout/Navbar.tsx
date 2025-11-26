@@ -15,12 +15,15 @@ import { useState, useEffect } from 'react';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 
+import { TableSelectionDialog } from '@/components/TableSelectionDialog';
+
 const Navbar = () => {
   const navigate = useNavigate();
   const [cartCount, setCartCount] = useState(0);
   const [tableNumber, setTableNumber] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isTableDialogOpen, setIsTableDialogOpen] = useState(false);
   const { t } = useTranslation();
 
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -110,6 +113,12 @@ const Navbar = () => {
     navigate('/');
   };
 
+  const handleTableSelect = (table: string) => {
+    localStorage.setItem('tableNumber', table);
+    setTableNumber(table);
+    window.dispatchEvent(new Event('storage'));
+  };
+
   return (
     <nav className="sticky top-0 z-50 bg-background border-b shadow-sm">
       <div className="container mx-auto px-4">
@@ -141,14 +150,7 @@ const Navbar = () => {
                 Delivery
               </button>
               <button
-                onClick={() => {
-                  const input = prompt('Enter Table Number (or scan QR code):');
-                  if (input) {
-                    localStorage.setItem('tableNumber', input);
-                    setTableNumber(input);
-                    window.dispatchEvent(new Event('storage'));
-                  }
-                }}
+                onClick={() => setIsTableDialogOpen(true)}
                 className={`px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-medium rounded-md transition-all ${tableNumber
                   ? 'bg-background text-primary shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
@@ -265,6 +267,12 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      <TableSelectionDialog
+        isOpen={isTableDialogOpen}
+        onClose={() => setIsTableDialogOpen(false)}
+        onSelect={handleTableSelect}
+      />
     </nav>
   );
 };

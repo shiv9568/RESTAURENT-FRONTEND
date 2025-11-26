@@ -144,14 +144,14 @@ const Cart = () => {
     }
   }, [userKey, isSignedIn]);
 
-  const handleQuantityChange = (itemId: string, newQuantity: number) => {
-    updateCartItemQuantity(itemId, newQuantity);
+  const handleQuantityChange = (itemId: string, newQuantity: number, selectedPortion?: string) => {
+    updateCartItemQuantity(itemId, newQuantity, selectedPortion);
     loadCart();
     window.dispatchEvent(new Event('storage'));
   };
 
-  const handleRemove = (itemId: string, itemName: string) => {
-    removeFromCart(itemId);
+  const handleRemove = (itemId: string, itemName: string, selectedPortion?: string) => {
+    removeFromCart(itemId, selectedPortion);
     loadCart();
     window.dispatchEvent(new Event('storage'));
     toast.success(`${itemName} removed from cart`);
@@ -333,7 +333,7 @@ const Cart = () => {
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-4">
           {cartItems.map((item) => (
-            <Card key={item.id} className="p-4">
+            <Card key={`${item.id}-${item.selectedPortion || 'default'}`} className="p-4">
               <div className="flex gap-4">
                 {item.image && (
                   <img
@@ -372,7 +372,7 @@ const Cart = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleRemove(item.id, item.name)}
+                      onClick={() => handleRemove(item.id, item.name, item.selectedPortion)}
                     >
                       <Trash2 className="w-4 h-4 text-red-500" />
                     </Button>
@@ -383,7 +383,7 @@ const Cart = () => {
                     <div className="flex items-center gap-3 bg-gray-100 rounded-lg px-3 py-1">
                       <button
                         onClick={() =>
-                          handleQuantityChange(item.id, Math.max(1, item.quantity - 1))
+                          handleQuantityChange(item.id, Math.max(1, item.quantity - 1), item.selectedPortion)
                         }
                         className="text-primary hover:text-primary-hover disabled:opacity-50"
                         disabled={item.quantity <= 1}
@@ -395,7 +395,7 @@ const Cart = () => {
                       </span>
                       <button
                         onClick={() =>
-                          handleQuantityChange(item.id, item.quantity + 1)
+                          handleQuantityChange(item.id, item.quantity + 1, item.selectedPortion)
                         }
                         className="text-primary hover:text-primary-hover"
                       >

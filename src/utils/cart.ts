@@ -29,9 +29,9 @@ export const addToCart = (item: CartItem): void => {
   saveCart(cart);
 };
 
-export const updateCartItemQuantity = (itemId: string, quantity: number): void => {
+export const updateCartItemQuantity = (itemId: string, quantity: number, selectedPortion?: string): void => {
   const cart = getCart();
-  const itemIndex = cart.findIndex((i) => i.id === itemId);
+  const itemIndex = cart.findIndex((i) => i.id === itemId && i.selectedPortion === selectedPortion);
 
   if (itemIndex > -1) {
     if (quantity <= 0) {
@@ -43,8 +43,8 @@ export const updateCartItemQuantity = (itemId: string, quantity: number): void =
   }
 };
 
-export const removeFromCart = (itemId: string): void => {
-  const cart = getCart().filter((item) => item.id !== itemId);
+export const removeFromCart = (itemId: string, selectedPortion?: string): void => {
+  const cart = getCart().filter((item) => !(item.id === itemId && item.selectedPortion === selectedPortion));
   saveCart(cart);
 };
 
