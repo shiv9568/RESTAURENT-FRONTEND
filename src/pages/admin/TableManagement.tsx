@@ -108,7 +108,7 @@ const TableManagement = () => {
     const printQRCode = () => {
         const printWindow = window.open('', '_blank');
         if (printWindow && selectedTable) {
-            const baseUrl = window.location.origin;
+            const baseUrl = (import.meta.env.VITE_FRONTEND_URL || window.location.origin).replace(/\/$/, '');
             const qrUrl = `${baseUrl}/?table=${selectedTable.tableNumber}`;
             printWindow.document.write(`
         <html>
@@ -246,7 +246,7 @@ const TableManagement = () => {
                                                     <div className="flex flex-col items-center justify-center p-6 space-y-4">
                                                         <div className="bg-white p-4 rounded-lg shadow-sm border">
                                                             <QRCode
-                                                                value={`${window.location.origin}/?table=${table.tableNumber}`}
+                                                                value={`${(import.meta.env.VITE_FRONTEND_URL || window.location.origin).replace(/\/$/, '')}/?table=${table.tableNumber}`}
                                                                 size={200}
                                                             />
                                                         </div>
