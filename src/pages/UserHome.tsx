@@ -181,43 +181,6 @@ const UserHome: React.FC = () => {
       ) : (
         <div className="sticky top-16 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b mt-0 w-full">
           <div className="flex items-center px-4 py-3 gap-3">
-            {/* Quick Menu Button (Mobile/Tablet only) */}
-            <div className="lg:hidden flex-shrink-0">
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" className="rounded-full h-9 w-9">
-                    <Menu className="h-4 w-4" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
-                  <SheetHeader>
-                    <SheetTitle>Menu Items</SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-6 space-y-2">
-                    {visibleItems.map(item => (
-                      <SheetClose key={item.id} asChild>
-                        <div
-                          onClick={() => scrollToItem(item.id)}
-                          className="flex items-center justify-between p-3 rounded-lg hover:bg-muted cursor-pointer border border-transparent hover:border-border transition-colors"
-                        >
-                          <div className="flex items-center gap-3 overflow-hidden">
-                            {item.image && (
-                              <img src={item.image} alt={item.name} className="w-8 h-8 rounded-md object-cover flex-shrink-0" />
-                            )}
-                            <span className="truncate text-sm font-medium">{item.name}</span>
-                          </div>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        </div>
-                      </SheetClose>
-                    ))}
-                    {visibleItems.length === 0 && (
-                      <p className="text-center text-muted-foreground text-sm py-4">No items found</p>
-                    )}
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
-
             {/* Scrollable Categories */}
             <div
               className="flex gap-3 overflow-x-auto w-full"
@@ -249,6 +212,47 @@ const UserHome: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Floating Menu Button for Mobile */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 lg:hidden">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button size="lg" className="rounded-full shadow-lg gap-2 px-6 bg-primary text-primary-foreground hover:bg-primary/90">
+              <Menu className="h-4 w-4" />
+              Menu
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="h-[80vh] rounded-t-xl">
+            <SheetHeader>
+              <SheetTitle>Menu Items</SheetTitle>
+            </SheetHeader>
+            <div className="mt-6 space-y-2 overflow-y-auto h-full pb-12">
+              {visibleItems.map(item => (
+                <SheetClose key={item.id} asChild>
+                  <div
+                    onClick={() => scrollToItem(item.id)}
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-muted cursor-pointer border border-transparent hover:border-border transition-colors"
+                  >
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      {item.image && (
+                        <img src={item.image} alt={item.name} className="w-10 h-10 rounded-md object-cover flex-shrink-0" />
+                      )}
+                      <div className="flex flex-col overflow-hidden">
+                        <span className="truncate text-sm font-medium">{item.name}</span>
+                        <span className="text-xs text-muted-foreground">₹{item.price}</span>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                  </div>
+                </SheetClose>
+              ))}
+              {visibleItems.length === 0 && (
+                <p className="text-center text-muted-foreground text-sm py-4">No items found</p>
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
 
       {/* Food Grid */}
       <div className="container mx-auto px-4 py-6">

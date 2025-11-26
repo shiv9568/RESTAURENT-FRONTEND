@@ -299,6 +299,7 @@ const Cart = () => {
         if (response.data) {
           // Clear cart
           localStorage.removeItem('foodie_cart');
+          localStorage.removeItem('cart'); // Clear both potential keys
           window.dispatchEvent(new Event('storage'));
           window.dispatchEvent(new Event('cartUpdated'));
 

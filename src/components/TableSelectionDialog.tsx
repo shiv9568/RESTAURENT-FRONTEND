@@ -73,7 +73,16 @@ export function TableSelectionDialog({ isOpen, onClose, onSelect, initialUserNam
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog
+            open={isOpen}
+            onOpenChange={(open) => {
+                // If trying to close (open=false) and we have a preselected table but no name, prevent closing
+                if (!open && preselectedTable && !userName.trim()) {
+                    return;
+                }
+                onClose();
+            }}
+        >
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>
