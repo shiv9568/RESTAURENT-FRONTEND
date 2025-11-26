@@ -78,9 +78,16 @@ const Navbar = () => {
     // Check for table number in URL
     const params = new URLSearchParams(window.location.search);
     const table = params.get('table');
+
     if (table) {
       localStorage.setItem('tableNumber', table);
       setTableNumber(table);
+
+      // If user name is missing, prompt for it
+      const storedUserName = localStorage.getItem('dineInUserName');
+      if (!storedUserName && !user) {
+        setIsTableDialogOpen(true);
+      }
     } else {
       const storedTable = localStorage.getItem('tableNumber');
       if (storedTable) {
@@ -96,7 +103,7 @@ const Navbar = () => {
       window.removeEventListener('storage', updateCartCount);
       window.removeEventListener('cartUpdated', updateCartCount);
     };
-  }, []);
+  }, [user]); // Added user dependency to check if logged in
 
   const updateCartCount = () => {
     setCartCount(getCartItemsCount());
@@ -137,45 +144,21 @@ const Navbar = () => {
 
           {/* Delivery / Dine-in Toggle */}
           <div className="flex items-center space-x-2">
-            <div className="flex bg-muted p-1 rounded-lg">
-              <button
-                onClick={() => {
-                  localStorage.removeItem('tableNumber');
-                  localStorage.removeItem('dineInUserName');
-                  setTableNumber(null);
-                  window.dispatchEvent(new Event('storage'));
-                }}
-                className={`px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-medium rounded-md transition-all ${!tableNumber
-                  ? 'bg-background text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-                  }`}
-              >
-                Delivery
-              </button>
-              <button
+            {tableNumber ? (
+              <div className="flex items-center h-8 px-3 gap-2 text-xs font-medium border border-primary text-primary bg-primary/5 rounded-md">
+                <span className="text-sm">🍽️</span>
+                Table {tableNumber}
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setIsTableDialogOpen(true)}
-                className={`px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-medium rounded-md transition-all ${tableNumber
-                  ? 'bg-background text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-                  }`}
+                className="gap-2 text-muted-foreground hover:text-foreground"
               >
-                Dine-in
-              </button>
-            </div>
-
-            {/* Location Display (only for Delivery) */}
-            {!tableNumber && (
-              <div className="hidden lg:flex items-center text-sm text-muted-foreground">
-                <MapPin className="w-4 h-4 mr-1" />
-                <span className="truncate max-w-[150px]">Muzaffarnagar...</span>
-              </div>
-            )}
-
-            {/* Table Display (only for Dine-in) */}
-            {tableNumber && (
-              <div className="hidden lg:flex items-center text-sm font-medium text-primary">
-                <span className="mr-1">🍽️</span> Table {tableNumber}
-              </div>
+                <span className="text-sm">🍽️</span>
+                Select Table
+              </Button>
             )}
           </div>
 
@@ -276,6 +259,7 @@ const Navbar = () => {
         onClose={() => setIsTableDialogOpen(false)}
         onSelect={handleTableSelect}
         initialUserName={user?.name || localStorage.getItem('dineInUserName') || ''}
+        preselectedTable={tableNumber}
       />
     </nav>
   );

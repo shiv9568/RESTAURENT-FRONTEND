@@ -12,7 +12,7 @@ interface TableSelectionDialogProps {
     onSelect: (tableNumber: string, userName: string) => void;
 }
 
-export function TableSelectionDialog({ isOpen, onClose, onSelect, initialUserName = '' }: TableSelectionDialogProps & { initialUserName?: string }) {
+export function TableSelectionDialog({ isOpen, onClose, onSelect, initialUserName = '', preselectedTable }: TableSelectionDialogProps & { initialUserName?: string, preselectedTable?: string | null }) {
     const [tables, setTables] = useState<Table[]>([]);
     const [loading, setLoading] = useState(false);
     const [manualTable, setManualTable] = useState('');
@@ -24,12 +24,17 @@ export function TableSelectionDialog({ isOpen, onClose, onSelect, initialUserNam
 
     useEffect(() => {
         if (isOpen) {
-            fetchTables();
             setUserName(initialUserName);
-            setSelectedTable(null);
-            setManualTable('');
+            if (preselectedTable) {
+                setSelectedTable(preselectedTable);
+                setManualTable('');
+            } else {
+                fetchTables();
+                setSelectedTable(null);
+                setManualTable('');
+            }
         }
-    }, [isOpen, initialUserName]);
+    }, [isOpen, initialUserName, preselectedTable]);
 
     const fetchTables = async () => {
         setLoading(true);
@@ -51,7 +56,7 @@ export function TableSelectionDialog({ isOpen, onClose, onSelect, initialUserNam
     };
 
     const handleConfirm = () => {
-        const table = selectedTable || manualTable.trim();
+        const table = preselectedTable || selectedTable || manualTable.trim();
 
         if (!table) {
             toast.error('Please select or enter a table number');
@@ -71,7 +76,9 @@ export function TableSelectionDialog({ isOpen, onClose, onSelect, initialUserNam
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Dine-in Details</DialogTitle>
+                    <DialogTitle>
+                        {preselectedTable ? `Welcome to Table ${preselectedTable}` : 'Dine-in Details'}
+                    </DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-6 py-4">
@@ -85,75 +92,80 @@ export function TableSelectionDialog({ isOpen, onClose, onSelect, initialUserNam
                             placeholder="Enter your full name"
                             value={userName}
                             onChange={(e) => setUserName(e.target.value)}
+                            autoFocus
                         />
                     </div>
 
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <span className="w-full border-t" />
-                        </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-background px-2 text-muted-foreground">Select Table</span>
-                        </div>
-                    </div>
-
-                    {/* Registered Tables List */}
-                    <div>
-                        {loading ? (
-                            <div className="flex justify-center py-4">
-                                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    {!preselectedTable && (
+                        <>
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <span className="w-full border-t" />
+                                </div>
+                                <div className="relative flex justify-center text-xs uppercase">
+                                    <span className="bg-background px-2 text-muted-foreground">Select Table</span>
+                                </div>
                             </div>
-                        ) : error ? (
-                            <div className="text-center text-red-500 text-sm py-2">{error}</div>
-                        ) : tables.length === 0 ? (
-                            <div className="text-center text-muted-foreground text-sm py-2">No tables registered</div>
-                        ) : (
-                            <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto p-1">
-                                {tables.map((table) => (
-                                    <Button
-                                        key={table._id}
-                                        variant={selectedTable === table.tableNumber ? "default" : "outline"}
-                                        className={`h-auto py-3 flex flex-col gap-1 ${selectedTable === table.tableNumber ? 'ring-2 ring-primary ring-offset-2' : ''
-                                            } ${table.status === 'occupied' && selectedTable !== table.tableNumber ? 'border-red-200 bg-red-50 hover:bg-red-100' :
-                                                table.status === 'reserved' && selectedTable !== table.tableNumber ? 'border-yellow-200 bg-yellow-50 hover:bg-yellow-100' :
-                                                    ''
-                                            }`}
-                                        onClick={() => {
-                                            setSelectedTable(table.tableNumber);
-                                            setManualTable('');
-                                        }}
-                                    >
-                                        <span className="font-bold text-lg">{table.tableNumber}</span>
-                                        <span className="text-[10px] uppercase opacity-70">{table.status}</span>
-                                    </Button>
-                                ))}
+
+                            {/* Registered Tables List */}
+                            <div>
+                                {loading ? (
+                                    <div className="flex justify-center py-4">
+                                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                                    </div>
+                                ) : error ? (
+                                    <div className="text-center text-red-500 text-sm py-2">{error}</div>
+                                ) : tables.length === 0 ? (
+                                    <div className="text-center text-muted-foreground text-sm py-2">No tables registered</div>
+                                ) : (
+                                    <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto p-1">
+                                        {tables.map((table) => (
+                                            <Button
+                                                key={table._id}
+                                                variant={selectedTable === table.tableNumber ? "default" : "outline"}
+                                                className={`h-auto py-3 flex flex-col gap-1 ${selectedTable === table.tableNumber ? 'ring-2 ring-primary ring-offset-2' : ''
+                                                    } ${table.status === 'occupied' && selectedTable !== table.tableNumber ? 'border-red-200 bg-red-50 hover:bg-red-100' :
+                                                        table.status === 'reserved' && selectedTable !== table.tableNumber ? 'border-yellow-200 bg-yellow-50 hover:bg-yellow-100' :
+                                                            ''
+                                                    }`}
+                                                onClick={() => {
+                                                    setSelectedTable(table.tableNumber);
+                                                    setManualTable('');
+                                                }}
+                                            >
+                                                <span className="font-bold text-lg">{table.tableNumber}</span>
+                                                <span className="text-[10px] uppercase opacity-70">{table.status}</span>
+                                            </Button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
 
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <span className="w-full border-t" />
-                        </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-background px-2 text-muted-foreground">Or type manually</span>
-                        </div>
-                    </div>
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <span className="w-full border-t" />
+                                </div>
+                                <div className="relative flex justify-center text-xs uppercase">
+                                    <span className="bg-background px-2 text-muted-foreground">Or type manually</span>
+                                </div>
+                            </div>
 
-                    {/* Manual Entry */}
-                    <div className="flex gap-2">
-                        <Input
-                            placeholder="Enter table number"
-                            value={manualTable}
-                            onChange={(e) => {
-                                setManualTable(e.target.value);
-                                if (e.target.value) setSelectedTable(null);
-                            }}
-                        />
-                    </div>
+                            {/* Manual Entry */}
+                            <div className="flex gap-2">
+                                <Input
+                                    placeholder="Enter table number"
+                                    value={manualTable}
+                                    onChange={(e) => {
+                                        setManualTable(e.target.value);
+                                        if (e.target.value) setSelectedTable(null);
+                                    }}
+                                />
+                            </div>
+                        </>
+                    )}
 
                     <Button onClick={handleConfirm} className="w-full" size="lg">
-                        Start Ordering
+                        {preselectedTable ? 'Confirm & Start Ordering' : 'Start Ordering'}
                     </Button>
                 </div>
             </DialogContent>
