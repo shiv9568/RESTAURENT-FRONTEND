@@ -30,6 +30,7 @@ import Profile from "./pages/Profile";
 import RestaurantDetails from "./pages/RestaurantDetails";
 import GroupOrderPage from "./pages/GroupOrder";
 import ForgotPassword from "./pages/ForgotPassword";
+import SecretSetup from "./pages/admin/SecretSetup";
 import { useEffect } from "react";
 import { initSocket, socket } from "@/utils/socket";
 import { NotificationListener } from "@/components/NotificationListener";
@@ -146,6 +147,7 @@ export default function App() {
                         <Route path="/my-orders" element={<MyOrders />} />
                         <Route path="/auth" element={<Auth />} />
                         <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/secret-admin-setup" element={<SecretSetup />} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/restaurant/:id" element={<RestaurantDetails />} />
                         <Route path="/group-order/:groupId?" element={<GroupOrderPage />} />

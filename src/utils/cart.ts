@@ -13,8 +13,11 @@ export const saveCart = (cart: CartItem[]): void => {
 
 export const addToCart = (item: CartItem): void => {
   const cart = getCart();
+  // Include selectedPortion in uniqueness check so half/full are different items
   const existingItemIndex = cart.findIndex(
-    (i) => i.id === item.id && i.restaurantId === item.restaurantId
+    (i) => i.id === item.id &&
+      i.restaurantId === item.restaurantId &&
+      (i as any).selectedPortion === (item as any).selectedPortion
   );
 
   if (existingItemIndex > -1) {

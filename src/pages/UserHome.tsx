@@ -7,6 +7,7 @@ import { Search, Leaf, Drumstick, Menu, ChevronRight } from 'lucide-react';
 import { categoriesAPI, foodItemsAPI } from '@/utils/apiService';
 import FoodCard from '@/components/FoodCard';
 import RecommendationSection from '@/components/RecommendationSection';
+import Onboarding from '@/components/Onboarding';
 import { MenuItem } from '@/types';
 import { restaurantBrandAPI } from '@/utils/api';
 import {
@@ -144,6 +145,9 @@ const UserHome: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Onboarding Guide */}
+      <Onboarding />
+
       {/* Filters row (inside page, not a navbar) */}
       <div className="container mx-auto px-4 pt-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">

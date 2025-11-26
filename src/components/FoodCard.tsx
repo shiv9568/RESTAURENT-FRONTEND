@@ -61,6 +61,19 @@ const FoodCard = ({ item, restaurantId = 'main', restaurantName = 'D&G Restauren
   };
 
   const handleAddClick = () => {
+    // Check if restaurant is closed before opening dialog or adding
+    if (isClosed) {
+      toast.warning('Restaurant is closed now. Please come back when we\'re open!', {
+        description: 'We can\'t accept orders right now.',
+      });
+      return;
+    }
+
+    if (item.isAvailable === false) {
+      toast.warning('This item is not available right now.');
+      return;
+    }
+
     if (hasPortions) {
       setShowPortionDialog(true);
     } else {
@@ -84,7 +97,14 @@ const FoodCard = ({ item, restaurantId = 'main', restaurantName = 'D&G Restauren
             placeholder="/placeholder.svg"
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
           />
-          {item.isAvailable === false && (
+          {isClosed && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <span className="px-3 py-1.5 text-sm font-bold bg-red-500 text-white rounded-lg shadow-lg">
+                🔒 Restaurant Closed
+              </span>
+            </div>
+          )}
+          {!isClosed && item.isAvailable === false && (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
               <span className="px-2 py-1 text-xs font-semibold bg-white/90 rounded">Not available now</span>
             </div>
@@ -118,7 +138,12 @@ const FoodCard = ({ item, restaurantId = 'main', restaurantName = 'D&G Restauren
             ) : (
               <span className="font-bold text-xl text-foreground">₹{item.price}</span>
             )}
-            <Button onClick={handleAddClick} disabled={isAdding || item.isAvailable === false} size="sm" className="flex items-center gap-1">
+            <Button
+              onClick={handleAddClick}
+              disabled={isAdding || item.isAvailable === false || isClosed}
+              size="sm"
+              className="flex items-center gap-1"
+            >
               {isAdding ? <div className="w-3 h-3 border-t-2 border-primary rounded-full animate-spin" /> : <Plus className="w-4 h-4" />}
               <ShoppingCart className="w-4 h-4" />
             </Button>

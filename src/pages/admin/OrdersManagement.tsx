@@ -5,7 +5,7 @@ import {
   Select,
   SelectContent,
   SelectItem,
-  SelectTrigger,  
+  SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -302,7 +302,15 @@ export default function OrdersManagement() {
                         <div className="space-y-1">
                           {order.items.map((item: any, idx: number) => (
                             <div key={idx} className="flex justify-between text-sm">
-                              <span><strong>{item.name || 'Item'}</strong> × {item.quantity}</span>
+                              <span>
+                                <strong>{item.name || 'Item'}</strong>
+                                {(item as any).selectedPortion && (
+                                  <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                                    {(item as any).selectedPortion}
+                                  </span>
+                                )}
+                                {' '}× {item.quantity}
+                              </span>
                               <span className="text-gray-600">₹{item.price * item.quantity}</span>
                             </div>
                           ))}

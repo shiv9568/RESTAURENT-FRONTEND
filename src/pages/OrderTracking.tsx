@@ -214,7 +214,13 @@ const OrderTracking = () => {
                     className="flex justify-between text-sm mb-1"
                   >
                     <span>
-                      {item.name} x {item.quantity}
+                      {item.name}
+                      {(item as any).selectedPortion && (
+                        <span className="ml-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full font-medium">
+                          {(item as any).selectedPortion}
+                        </span>
+                      )}
+                      {' '}× {item.quantity}
                     </span>
                     <span>₹{item.price * item.quantity}</span>
                   </div>

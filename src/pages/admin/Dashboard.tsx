@@ -12,15 +12,16 @@ import {
 } from 'lucide-react';
 import { DashboardStats } from '@/types';
 import { adminDashboardService } from '@/utils/adminService';
+import Onboarding from '@/components/Onboarding';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const StatCard = ({ 
-  title, 
-  value, 
-  icon: Icon, 
-  change, 
-  changeType 
+const StatCard = ({
+  title,
+  value,
+  icon: Icon,
+  change,
+  changeType
 }: {
   title: string;
   value: string | number;
@@ -36,11 +37,10 @@ const StatCard = ({
     <CardContent>
       <div className="text-2xl font-bold">{value}</div>
       {change && (
-        <p className={`text-xs mt-1 ${
-          changeType === 'positive' ? 'text-green-600' : 
-          changeType === 'negative' ? 'text-red-600' : 
-          'text-gray-600'
-        }`}>
+        <p className={`text-xs mt-1 ${changeType === 'positive' ? 'text-green-600' :
+          changeType === 'negative' ? 'text-red-600' :
+            'text-gray-600'
+          }`}>
           {change}
         </p>
       )}
@@ -87,6 +87,9 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Admin Onboarding Tour */}
+      <Onboarding type="admin" />
+
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-gray-600">Welcome back! Here's what's happening with your restaurant.</p>
@@ -181,10 +184,10 @@ export default function Dashboard() {
                     </div>
                     <div className="text-right">
                       <p className="font-medium">₹{order.total}</p>
-                      <Badge 
+                      <Badge
                         variant={
                           order.status === 'delivered' ? 'default' :
-                          order.status === 'pending' ? 'secondary' : 'outline'
+                            order.status === 'pending' ? 'secondary' : 'outline'
                         }
                         className="mt-1"
                       >

@@ -199,6 +199,7 @@ const Navbar = () => {
               size="icon"
               className="relative w-8 h-8 md:w-10 md:h-10"
               onClick={() => navigate('/cart')}
+              data-cart-icon
             >
               <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
               {cartCount > 0 && (
@@ -212,7 +213,7 @@ const Navbar = () => {
               <>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full bg-pink-600">
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full bg-pink-600" data-profile-menu>
                       <img
                         src={user?.avatar || profile}
                         className="h-8 w-8 rounded-full object-cover border border-green-200"

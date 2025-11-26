@@ -122,6 +122,10 @@ export default function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
                   <Link
                     key={item.name}
                     to={item.href}
+                    data-nav-orders={item.name === 'Manage Orders' ? true : undefined}
+                    data-nav-menu={item.name === 'Manage Menu' ? true : undefined}
+                    data-nav-tables={item.name === 'Tables' ? true : undefined}
+                    data-nav-settings={item.name === 'Settings' ? true : undefined}
                     onClick={() => {
                       // Close mobile sidebar when navigating
                       if (window.innerWidth < 1024) {

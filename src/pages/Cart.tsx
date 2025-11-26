@@ -266,6 +266,7 @@ const Cart = () => {
         price: item.price,
         quantity: item.quantity,
         image: item.image,
+        selectedPortion: (item as any).selectedPortion || undefined, // IMPORTANT: Include portion info
       })),
       total: grandTotal,
       subtotal: total,
@@ -359,6 +360,11 @@ const Cart = () => {
                         </div>
                         <h3 className="font-semibold">{item.name}</h3>
                       </div>
+                      {(item as any).selectedPortion && (
+                        <span className="inline-block ml-2 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                          {(item as any).selectedPortion}
+                        </span>
+                      )}
                       <p className="text-sm text-gray-500">
                         {item.restaurantName}
                       </p>

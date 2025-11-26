@@ -14,6 +14,7 @@ const ORDER_STATUSES = [
     { id: 'preparing', label: 'Preparing', color: 'bg-purple-100 border-purple-300' },
     { id: 'out-for-delivery', label: 'Out for Delivery', color: 'bg-orange-100 border-orange-300' },
     { id: 'delivered', label: 'Delivered', color: 'bg-green-100 border-green-300' },
+    { id: 'cancelled', label: 'Cancelled', color: 'bg-red-100 border-red-300' }, // Added cancelled column
 ];
 
 export default function OrdersKanban() {
@@ -188,8 +189,29 @@ export default function OrdersKanban() {
                                                                     )}
 
                                                                     {/* Items */}
-                                                                    <div className="text-xs text-muted-foreground">
-                                                                        {order.items?.length || 0} items
+                                                                    <div className="text-xs space-y-1">
+                                                                        {order.items && order.items.length > 0 ? (
+                                                                            order.items.slice(0, 3).map((item: any, idx: number) => (
+                                                                                <div key={idx} className="flex items-center justify-between text-xs">
+                                                                                    <span className="truncate">
+                                                                                        • <strong>{item.name}</strong>
+                                                                                        {(item as any).selectedPortion && (
+                                                                                            <span className="ml-1 px-1 py-0.5 bg-blue-100 text-blue-800 rounded text-[10px]">
+                                                                                                {(item as any).selectedPortion}
+                                                                                            </span>
+                                                                                        )}
+                                                                                        <span className="text-muted-foreground"> ×{item.quantity}</span>
+                                                                                    </span>
+                                                                                </div>
+                                                                            ))
+                                                                        ) : (
+                                                                            <span className="text-muted-foreground">No items</span>
+                                                                        )}
+                                                                        {order.items && order.items.length > 3 && (
+                                                                            <div className="text-[10px] text-muted-foreground">
+                                                                                +{order.items.length - 3} more items
+                                                                            </div>
+                                                                        )}
                                                                     </div>
 
                                                                     {/* Total & Payment */}
