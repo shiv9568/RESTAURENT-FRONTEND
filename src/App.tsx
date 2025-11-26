@@ -35,6 +35,7 @@ import SecretSetup from "./pages/admin/SecretSetup";
 import { useEffect } from "react";
 import { initSocket, socket } from "@/utils/socket";
 import { NotificationListener } from "@/components/NotificationListener";
+import ChatWidget from "@/components/ChatWidget";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -50,7 +51,7 @@ const initPushNotifications = async () => {
   }
   try {
     await navigator.serviceWorker.register("/service-worker.js");
-    console.log("Service worker registered for push notifications");
+    // console.log("Service worker registered for push notifications");
   } catch (err) {
     console.error("Service worker registration failed", err);
   }
@@ -83,7 +84,7 @@ export default function App() {
 
     // Listen for global updates
     const handleOrderUpdate = (data: any) => {
-      console.log('Socket event received:', data);
+      // console.log('Socket event received:', data);
       // Dispatch custom event for components to listen to
       window.dispatchEvent(new CustomEvent('adminDataChanged', {
         detail: { type: 'orders', ...data }
@@ -157,6 +158,7 @@ export default function App() {
                       </Routes>
                     </main>
                     {/* <Footer /> */}
+                    <ChatWidget />
                   </div>
                 }
               />

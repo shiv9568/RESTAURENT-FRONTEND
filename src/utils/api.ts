@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const DEFAULT_API_BASE = typeof window !== 'undefined'
-  ? (import.meta?.env?.VITE_API_URL || 'https://restaurent-server-cgxr.onrender.com/api')
+  ? (import.meta?.env?.VITE_API_URL || 'https://restaurent-server-cgxr.onrender.com/api') // Fallback to Render URL
   : process.env.VITE_API_URL || 'https://restaurent-server-cgxr.onrender.com/api';
 
 const api = axios.create({

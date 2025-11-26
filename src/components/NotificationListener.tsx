@@ -20,7 +20,7 @@ export function NotificationListener() {
         const socket = io(SOCKET_URL);
 
         socket.on('connect', () => {
-            console.log('Connected to socket server for notifications');
+            // console.log('Connected to socket server for notifications');
         });
 
         socket.on('orders:update', (data: any) => {
