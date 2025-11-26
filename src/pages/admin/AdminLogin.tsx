@@ -14,7 +14,7 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://restaurent-frontend-d58mq5cpu-shiv9568s-projects.vercel.app';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
