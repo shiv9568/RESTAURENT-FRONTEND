@@ -14,7 +14,7 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://restaurent-frontend-d58mq5cpu-shiv9568s-projects.vercel.app';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://restaurent-server-cgxr.onrender.com/api';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +70,7 @@ export default function AdminLogin() {
             Sign in to manage your restaurant
           </p>
         </div>
-        
+
         <Card className="border-blue-200">
           <CardHeader>
             <CardTitle className="text-center text-blue-700">Admin Login</CardTitle>
@@ -82,7 +82,7 @@ export default function AdminLogin() {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email">Admin Email</Label>
                 <div className="relative">
@@ -99,7 +99,7 @@ export default function AdminLogin() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
@@ -116,7 +116,7 @@ export default function AdminLogin() {
                   />
                 </div>
               </div>
-              
+
               <Button
                 type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700"
@@ -132,7 +132,7 @@ export default function AdminLogin() {
                 )}
               </Button>
             </form>
-            
+
             <div className="mt-6 text-center">
               <p className="text-xs text-gray-500">
                 Only users with admin privileges can access this portal
