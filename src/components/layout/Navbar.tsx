@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ShoppingCart, User, Search, MapPin, LogOut, Sun, Moon, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -213,24 +214,24 @@ const Navbar = () => {
               )}
             </Button>
 
+
             {isSignedIn ? (
               <>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full bg-pink-600" data-profile-menu>
-                      <img
-                        src={user?.avatar || profile}
-                        className="h-8 w-8 rounded-full object-cover border border-green-200"
-                      />
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full" data-profile-menu>
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user?.avatar} alt={user?.name || 'User'} />
+                        <AvatarFallback>{user?.name ? user.name.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
+                      </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <div className="flex items-center gap-3 p-3">
-                      <img
-                        src={user?.avatar || profile}
-                        alt={user?.name || 'User'}
-                        className="h-10 w-10 rounded-full object-cover border border-gray-200"
-                      />
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={user?.avatar} alt={user?.name || 'User'} />
+                        <AvatarFallback>{user?.name ? user.name.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
+                      </Avatar>
                       <div className="flex flex-col space-y-1">
                         <p className="font-medium truncate">
                           {user?.name || 'User'}
