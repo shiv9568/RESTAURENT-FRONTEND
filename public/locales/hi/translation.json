@@ -1,0 +1,35 @@
+{
+    "app_name": "Foodie Dash",
+    "nav": {
+        "home": "होम",
+        "cart": "कार्ट",
+        "orders": "मेरे ऑर्डर",
+        "login": "लॉग इन",
+        "profile": "प्रोफाइल",
+        "logout": "लॉग आउट",
+        "admin": "एडमिन"
+    },
+    "home": {
+        "search_placeholder": "खाना खोजें...",
+        "veg_only": "केवल शाकाहारी",
+        "all": "सभी",
+        "trending": "इस सप्ताह ट्रेंडिंग",
+        "popular": "लोकप्रिय आइटम",
+        "chefs_special": "शेफ की पसंद",
+        "no_items": "कोई आइटम नहीं मिला।",
+        "loading": "लोड हो रहा है..."
+    },
+    "cart": {
+        "title": "आपकी कार्ट",
+        "empty": "आपकी कार्ट खाली है",
+        "checkout": "चेकआउट",
+        "total": "कुल"
+    },
+    "auth": {
+        "login_title": "वापसी पर स्वागत है",
+        "signup_title": "खाता बनाएं",
+        "email": "ईमेल पता",
+        "password": "पासवर्ड",
+        "submit": "जमा करें"
+    }
+}

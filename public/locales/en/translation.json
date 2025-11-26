@@ -1,0 +1,35 @@
+{
+    "app_name": "Foodie Dash",
+    "nav": {
+        "home": "Home",
+        "cart": "Cart",
+        "orders": "My Orders",
+        "login": "Login",
+        "profile": "Profile",
+        "logout": "Logout",
+        "admin": "Admin"
+    },
+    "home": {
+        "search_placeholder": "Search food...",
+        "veg_only": "Veg Only",
+        "all": "All",
+        "trending": "Trending This Week",
+        "popular": "Popular Items",
+        "chefs_special": "Chef's Special",
+        "no_items": "No food items found.",
+        "loading": "Loading..."
+    },
+    "cart": {
+        "title": "Your Cart",
+        "empty": "Your cart is empty",
+        "checkout": "Checkout",
+        "total": "Total"
+    },
+    "auth": {
+        "login_title": "Welcome Back",
+        "signup_title": "Create Account",
+        "email": "Email Address",
+        "password": "Password",
+        "submit": "Submit"
+    }
+}

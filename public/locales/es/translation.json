@@ -1,0 +1,35 @@
+{
+    "app_name": "Foodie Dash",
+    "nav": {
+        "home": "Inicio",
+        "cart": "Carrito",
+        "orders": "Mis Pedidos",
+        "login": "Iniciar Sesión",
+        "profile": "Perfil",
+        "logout": "Cerrar Sesión",
+        "admin": "Administrador"
+    },
+    "home": {
+        "search_placeholder": "Buscar comida...",
+        "veg_only": "Solo Veg",
+        "all": "Todos",
+        "trending": "Tendencias de la Semana",
+        "popular": "Artículos Populares",
+        "chefs_special": "Especial del Chef",
+        "no_items": "No se encontraron artículos.",
+        "loading": "Cargando..."
+    },
+    "cart": {
+        "title": "Tu Carrito",
+        "empty": "Tu carrito está vacío",
+        "checkout": "Pagar",
+        "total": "Total"
+    },
+    "auth": {
+        "login_title": "Bienvenido de nuevo",
+        "signup_title": "Crear Cuenta",
+        "email": "Correo Electrónico",
+        "password": "Contraseña",
+        "submit": "Enviar"
+    }
+}
