@@ -16,6 +16,7 @@ import OffersManagement from "./pages/admin/OffersManagement";
 import DeliveryZonesManagement from "./pages/admin/DeliveryZonesManagement";
 import Settings from "./pages/admin/Settings";
 import TableManagement from "./pages/admin/TableManagement";
+import SalesReports from "./pages/admin/SalesReports";
 import AdminLogin from "./pages/admin/AdminLogin";
 import SuperAdminDashboard from "./pages/super-admin/SuperAdminDashboard";
 import NotFound from "./pages/NotFound";
@@ -126,6 +127,7 @@ export default function App() {
                 <Route path="menu" element={<MenuManagement />} />
                 <Route path="food" element={<FoodManagement />} />
                 <Route path="orders" element={<OrdersManagement />} />
+                <Route path="sales-reports" element={<SalesReports />} />
                 <Route path="offers" element={<OffersManagement />} />
                 <Route path="delivery-zones" element={<DeliveryZonesManagement />} />
                 <Route path="tables" element={<TableManagement />} />

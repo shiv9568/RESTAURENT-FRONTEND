@@ -12,6 +12,7 @@ import {
   X,
   Menu,
   QrCode,
+  BarChart3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -46,6 +47,11 @@ const navigation: NavigationItem[] = [
     name: 'Manage Orders',
     href: '/admin/orders',
     icon: ShoppingBag,
+  },
+  {
+    name: 'Sales Reports',
+    href: '/admin/sales-reports',
+    icon: BarChart3,
   },
   {
     name: 'Offers',
