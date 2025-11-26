@@ -113,8 +113,9 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const handleTableSelect = (table: string) => {
+  const handleTableSelect = (table: string, userName: string) => {
     localStorage.setItem('tableNumber', table);
+    localStorage.setItem('dineInUserName', userName);
     setTableNumber(table);
     window.dispatchEvent(new Event('storage'));
   };
@@ -139,6 +140,7 @@ const Navbar = () => {
               <button
                 onClick={() => {
                   localStorage.removeItem('tableNumber');
+                  localStorage.removeItem('dineInUserName');
                   setTableNumber(null);
                   window.dispatchEvent(new Event('storage'));
                 }}
@@ -272,6 +274,7 @@ const Navbar = () => {
         isOpen={isTableDialogOpen}
         onClose={() => setIsTableDialogOpen(false)}
         onSelect={handleTableSelect}
+        initialUserName={user?.name || localStorage.getItem('dineInUserName') || ''}
       />
     </nav>
   );

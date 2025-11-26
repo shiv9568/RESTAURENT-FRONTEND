@@ -70,13 +70,43 @@ export default function OrdersManagement() {
     }
   };
 
+  const [cancellationDialog, setCancellationDialog] = useState<{ isOpen: boolean; orderId: string | null }>({
+    isOpen: false,
+    orderId: null,
+  });
+  const [cancellationReason, setCancellationReason] = useState('');
+
   const handleStatusChange = async (orderId: string, newStatus: string) => {
+    if (newStatus === 'cancelled') {
+      setCancellationDialog({ isOpen: true, orderId });
+      return;
+    }
+
     try {
       await adminOrdersService.updateStatus(orderId, newStatus);
       toast.success('Order status updated');
       await loadOrders();
     } catch (error) {
       toast.error('Failed to update order status');
+    }
+  };
+
+  const handleConfirmCancellation = async () => {
+    if (!cancellationDialog.orderId) return;
+
+    if (!cancellationReason.trim()) {
+      toast.error('Please provide a reason for cancellation');
+      return;
+    }
+
+    try {
+      await adminOrdersService.updateStatus(cancellationDialog.orderId, 'cancelled', cancellationReason);
+      toast.success('Order cancelled successfully');
+      setCancellationDialog({ isOpen: false, orderId: null });
+      setCancellationReason('');
+      await loadOrders();
+    } catch (error: any) {
+      toast.error('Failed to cancel order: ' + (error.message || 'Unknown error'));
     }
   };
 
@@ -394,6 +424,54 @@ export default function OrdersManagement() {
           )}
         </CardContent>
       </Card>
+
+      {/* Cancellation Reason Dialog */}
+      <Dialog
+        open={cancellationDialog.isOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCancellationDialog({ isOpen: false, orderId: null });
+            setCancellationReason('');
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Order</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              Please provide a reason for cancelling this order. This will be visible to the customer.
+            </p>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Cancellation Reason</label>
+              <Input
+                placeholder="e.g., Item out of stock, Kitchen closed, etc."
+                value={cancellationReason}
+                onChange={(e) => setCancellationReason(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setCancellationDialog({ isOpen: false, orderId: null });
+                  setCancellationReason('');
+                }}
+              >
+                Back
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleConfirmCancellation}
+                disabled={!cancellationReason.trim()}
+              >
+                Confirm Cancellation
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

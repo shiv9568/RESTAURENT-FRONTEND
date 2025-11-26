@@ -127,10 +127,13 @@ const OrderTracking = () => {
               <p className="text-muted-foreground">
                 This order has been cancelled {order.cancelledBy === 'admin' ? 'by the restaurant' : ''}.
               </p>
-              {order.cancellationReason && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  Reason: {order.cancellationReason}
-                </p>
+              {(order.cancellationReason || order.cancelReason) && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg inline-block text-left">
+                  <p className="text-sm font-semibold text-red-800 mb-1">Reason for Cancellation:</p>
+                  <p className="text-sm text-red-700">
+                    {order.cancellationReason || order.cancelReason}
+                  </p>
+                </div>
               )}
             </div>
           ) : (

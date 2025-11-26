@@ -9,22 +9,27 @@ import { toast } from 'sonner';
 interface TableSelectionDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    onSelect: (tableNumber: string) => void;
+    onSelect: (tableNumber: string, userName: string) => void;
 }
 
-export function TableSelectionDialog({ isOpen, onClose, onSelect }: TableSelectionDialogProps) {
+export function TableSelectionDialog({ isOpen, onClose, onSelect, initialUserName = '' }: TableSelectionDialogProps & { initialUserName?: string }) {
     const [tables, setTables] = useState<Table[]>([]);
     const [loading, setLoading] = useState(false);
     const [manualTable, setManualTable] = useState('');
+    const [userName, setUserName] = useState(initialUserName);
     const [error, setError] = useState<string | null>(null);
+    const [selectedTable, setSelectedTable] = useState<string | null>(null);
 
     const API_URL = import.meta.env.VITE_API_URL || 'https://restaurent-server-cgxr.onrender.com/api';
 
     useEffect(() => {
         if (isOpen) {
             fetchTables();
+            setUserName(initialUserName);
+            setSelectedTable(null);
+            setManualTable('');
         }
-    }, [isOpen]);
+    }, [isOpen, initialUserName]);
 
     const fetchTables = async () => {
         setLoading(true);
@@ -33,9 +38,6 @@ export function TableSelectionDialog({ isOpen, onClose, onSelect }: TableSelecti
             const response = await fetch(`${API_URL}/tables`);
             if (response.ok) {
                 const data = await response.json();
-                // Filter only available tables if needed, but user might want to select an occupied one if they are sitting there?
-                // Usually users select their table when they sit down.
-                // Let's show all tables but maybe mark status.
                 setTables(data);
             } else {
                 setError('Failed to load tables');
@@ -48,25 +50,55 @@ export function TableSelectionDialog({ isOpen, onClose, onSelect }: TableSelecti
         }
     };
 
-    const handleManualSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (manualTable.trim()) {
-            onSelect(manualTable.trim());
-            onClose();
+    const handleConfirm = () => {
+        const table = selectedTable || manualTable.trim();
+
+        if (!table) {
+            toast.error('Please select or enter a table number');
+            return;
         }
+
+        if (!userName.trim()) {
+            toast.error('Please enter your name');
+            return;
+        }
+
+        onSelect(table, userName.trim());
+        onClose();
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Select Your Table</DialogTitle>
+                    <DialogTitle>Dine-in Details</DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-6 py-4">
+                    {/* User Name Input */}
+                    <div className="space-y-2">
+                        <label htmlFor="userName" className="text-sm font-medium">
+                            Your Name <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                            id="userName"
+                            placeholder="Enter your full name"
+                            value={userName}
+                            onChange={(e) => setUserName(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background px-2 text-muted-foreground">Select Table</span>
+                        </div>
+                    </div>
+
                     {/* Registered Tables List */}
                     <div>
-                        <h3 className="text-sm font-medium mb-3 text-muted-foreground">Select from available tables:</h3>
                         {loading ? (
                             <div className="flex justify-center py-4">
                                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -80,18 +112,19 @@ export function TableSelectionDialog({ isOpen, onClose, onSelect }: TableSelecti
                                 {tables.map((table) => (
                                     <Button
                                         key={table._id}
-                                        variant="outline"
-                                        className={`h-auto py-3 flex flex-col gap-1 ${table.status === 'occupied' ? 'border-red-200 bg-red-50 hover:bg-red-100' :
-                                                table.status === 'reserved' ? 'border-yellow-200 bg-yellow-50 hover:bg-yellow-100' :
-                                                    'hover:border-primary hover:bg-primary/5'
+                                        variant={selectedTable === table.tableNumber ? "default" : "outline"}
+                                        className={`h-auto py-3 flex flex-col gap-1 ${selectedTable === table.tableNumber ? 'ring-2 ring-primary ring-offset-2' : ''
+                                            } ${table.status === 'occupied' && selectedTable !== table.tableNumber ? 'border-red-200 bg-red-50 hover:bg-red-100' :
+                                                table.status === 'reserved' && selectedTable !== table.tableNumber ? 'border-yellow-200 bg-yellow-50 hover:bg-yellow-100' :
+                                                    ''
                                             }`}
                                         onClick={() => {
-                                            onSelect(table.tableNumber);
-                                            onClose();
+                                            setSelectedTable(table.tableNumber);
+                                            setManualTable('');
                                         }}
                                     >
                                         <span className="font-bold text-lg">{table.tableNumber}</span>
-                                        <span className="text-[10px] uppercase text-muted-foreground">{table.status}</span>
+                                        <span className="text-[10px] uppercase opacity-70">{table.status}</span>
                                     </Button>
                                 ))}
                             </div>
@@ -108,16 +141,20 @@ export function TableSelectionDialog({ isOpen, onClose, onSelect }: TableSelecti
                     </div>
 
                     {/* Manual Entry */}
-                    <form onSubmit={handleManualSubmit} className="flex gap-2">
+                    <div className="flex gap-2">
                         <Input
                             placeholder="Enter table number"
                             value={manualTable}
-                            onChange={(e) => setManualTable(e.target.value)}
+                            onChange={(e) => {
+                                setManualTable(e.target.value);
+                                if (e.target.value) setSelectedTable(null);
+                            }}
                         />
-                        <Button type="submit" disabled={!manualTable.trim()}>
-                            Confirm
-                        </Button>
-                    </form>
+                    </div>
+
+                    <Button onClick={handleConfirm} className="w-full" size="lg">
+                        Start Ordering
+                    </Button>
                 </div>
             </DialogContent>
         </Dialog>

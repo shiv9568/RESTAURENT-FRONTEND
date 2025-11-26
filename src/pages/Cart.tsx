@@ -255,6 +255,9 @@ const Cart = () => {
     // Get phone number from: 1) User profile, 2) Selected address, 3) Clerk profile
     const phoneNumber = userProfile?.mobile || userProfile?.phone || selectedAddress?.phone || user?.phoneNumbers?.[0]?.phoneNumber || '';
 
+    // Get dine-in user name if available
+    const dineInUserName = localStorage.getItem('dineInUserName');
+
     const orderData = {
       orderNumber: generatedOrderNumber,
       userId: getBackendUserId() || 'guest',
@@ -275,7 +278,7 @@ const Cart = () => {
       deliveryFee: deliveryFee,
       gst: gst,
       status: 'pending',
-      customerName: user?.fullName || user?.firstName || 'Guest',
+      customerName: user?.fullName || user?.firstName || dineInUserName || 'Guest',
       customerEmail: user?.primaryEmailAddress?.emailAddress || '',
       customerPhone: phoneNumber,
       paymentMethod: paymentMethod,

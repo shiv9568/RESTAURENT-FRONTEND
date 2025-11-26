@@ -297,9 +297,13 @@ const Profile = () => {
                         name="phone"
                         type="tel"
                         value={profile.phone}
-                        onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          setProfile({ ...profile, phone: val });
+                        }}
                         disabled={!editing || loading}
-                        placeholder="+91 1234567890"
+                        placeholder="1234567890"
+                        maxLength={10}
                       />
                     </div>
                   </div>

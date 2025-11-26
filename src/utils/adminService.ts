@@ -318,10 +318,15 @@ export const adminOrdersService = {
     }
   },
 
-  updateStatus: async (id: string, status: string): Promise<AdminOrder> => {
+  updateStatus: async (id: string, status: string, reason?: string): Promise<AdminOrder> => {
     try {
-      console.log(`Updating order ${id} to status: ${status}`);
-      const response = await api.put(`/orders/${id}`, { status });
+      console.log(`Updating order ${id} to status: ${status}${reason ? ` with reason: ${reason}` : ''}`);
+      const payload: any = { status };
+      if (reason) {
+        payload.cancellationReason = reason;
+      }
+
+      const response = await api.put(`/orders/${id}`, payload);
       const updated = { ...response.data, id: response.data.id || response.data._id };
 
       // Also update in localStorage (foodie_orders)
@@ -331,7 +336,11 @@ export const adminOrdersService = {
           order.id === id || order.orderNumber === id || order._id === id
         );
         if (index !== -1) {
-          localOrdersRaw[index] = { ...localOrdersRaw[index], status };
+          localOrdersRaw[index] = {
+            ...localOrdersRaw[index],
+            status,
+            ...(reason ? { cancellationReason: reason } : {})
+          };
           localStorage.setItem('foodie_orders', JSON.stringify(localOrdersRaw));
         }
       }
@@ -350,7 +359,11 @@ export const adminOrdersService = {
           order.id === id || order.orderNumber === id || order._id === id
         );
         if (index !== -1) {
-          localOrdersRaw[index] = { ...localOrdersRaw[index], status: status as any };
+          localOrdersRaw[index] = {
+            ...localOrdersRaw[index],
+            status: status as any,
+            ...(reason ? { cancellationReason: reason } : {})
+          };
           localStorage.setItem('foodie_orders', JSON.stringify(localOrdersRaw));
           console.log('Order updated in localStorage only');
           return localOrdersRaw[index];
