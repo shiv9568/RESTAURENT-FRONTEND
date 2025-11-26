@@ -10,7 +10,7 @@ import axios from 'axios';
 import { PasswordStrengthIndicator } from '@/components/PasswordStrength';
 import { Loader2, Mail, Lock, User as UserIcon, Eye, EyeOff } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://restaurent-server-cgxr.onrender.com/api';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);

@@ -30,7 +30,7 @@ const TableManagement = () => {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [selectedTable, setSelectedTable] = useState<TableType | null>(null);
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const API_URL = import.meta.env.VITE_API_URL || 'https://restaurent-server-cgxr.onrender.com/api';
 
     useEffect(() => {
         fetchTables();
@@ -108,7 +108,8 @@ const TableManagement = () => {
     const printQRCode = () => {
         const printWindow = window.open('', '_blank');
         if (printWindow && selectedTable) {
-            const qrUrl = `http://192.168.1.110:8080/?table=${selectedTable.tableNumber}`;
+            const baseUrl = window.location.origin;
+            const qrUrl = `${baseUrl}/?table=${selectedTable.tableNumber}`;
             printWindow.document.write(`
         <html>
           <head>
@@ -245,7 +246,7 @@ const TableManagement = () => {
                                                     <div className="flex flex-col items-center justify-center p-6 space-y-4">
                                                         <div className="bg-white p-4 rounded-lg shadow-sm border">
                                                             <QRCode
-                                                                value={`http://192.168.1.110:8080/?table=${table.tableNumber}`}
+                                                                value={`${window.location.origin}/?table=${table.tableNumber}`}
                                                                 size={200}
                                                             />
                                                         </div>

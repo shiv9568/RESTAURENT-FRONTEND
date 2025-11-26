@@ -185,7 +185,7 @@ const Navbar = () => {
             >
               {theme === 'light' ? <Moon className="h-4 w-4 md:h-5 md:w-5" /> : <Sun className="h-4 w-4 md:h-5 md:w-5" />}
             </Button>
-            <Button
+            {/* <Button
               variant="ghost"
               size="icon"
               className="relative w-8 h-8 md:w-10 md:h-10"
@@ -193,7 +193,7 @@ const Navbar = () => {
               title="Group Order"
             >
               <Users className="w-4 h-4 md:w-5 md:h-5" />
-            </Button>
+            </Button> */}
             <Button
               variant="ghost"
               size="icon"

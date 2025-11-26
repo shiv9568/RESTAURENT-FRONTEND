@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const DEFAULT_API_BASE = typeof window !== 'undefined'
-  ? (import.meta?.env?.VITE_API_URL || 'http://localhost:5000/api')
-  : process.env.VITE_API_URL || 'http://localhost:5000/api';
+  ? (import.meta?.env?.VITE_API_URL || 'https://restaurent-server-cgxr.onrender.com/api')
+  : process.env.VITE_API_URL || 'https://restaurent-server-cgxr.onrender.com/api';
 
 const api = axios.create({
   baseURL: DEFAULT_API_BASE,
@@ -13,7 +13,7 @@ const api = axios.create({
 
 // Add token to requests if available
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -42,6 +42,7 @@ export const userAPI = {
   signup: (userData: any) => api.post('/users/signup', userData),
   getProfile: () => api.get('/users/profile'),
   updateProfile: (data: any) => api.put('/users/profile', data),
+  changePassword: (data: any) => api.post('/users/change-password', data),
 
   // Address CRUD
   getUserAddresses: (userId: string) => api.get(`/users/${userId}/addresses`),

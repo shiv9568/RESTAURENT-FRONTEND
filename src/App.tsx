@@ -63,6 +63,22 @@ export default function App() {
     // Initialize socket connection
     initSocket();
 
+    // Check for table parameter and notify admin
+    const searchParams = new URLSearchParams(window.location.search);
+    const tableNumber = searchParams.get('table');
+    if (tableNumber) {
+      // Wait for socket to be ready
+      const checkSocket = setInterval(() => {
+        if (socket.connected) {
+          socket.emit('table_connected', tableNumber);
+          clearInterval(checkSocket);
+        }
+      }, 500);
+
+      // Cleanup interval after 10 seconds to prevent infinite checking
+      setTimeout(() => clearInterval(checkSocket), 10000);
+    }
+
     // Listen for global updates
     const handleOrderUpdate = (data: any) => {
       console.log('Socket event received:', data);

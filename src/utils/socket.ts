@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-const URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const URL = import.meta.env.VITE_API_URL || 'https://restaurent-server-cgxr.onrender.com/api';
 
 // Remove /api from the end if present, as socket.io connects to root
 const socketUrl = URL.endsWith('/api') ? URL.slice(0, -4) : URL;

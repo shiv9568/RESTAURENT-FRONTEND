@@ -204,10 +204,18 @@ export default function OrdersKanban() {
                                                                     </div>
 
                                                                     {/* Time */}
-                                                                    <div className="text-xs text-muted-foreground text-center">
-                                                                        {formatTime(order.orderedAt || order.createdAt)}
-                                                                    </div>
+                                                                    {formatTime(order.orderedAt || order.createdAt)}
                                                                 </div>
+
+                                                                {/* Notes Indicator */}
+                                                                {order.notes && (
+                                                                    <div className="mt-2 pt-2 border-t border-dashed">
+                                                                        <p className="text-xs text-yellow-700 bg-yellow-50 p-1 rounded flex items-start gap-1">
+                                                                            <span className="mt-0.5">📝</span>
+                                                                            <span className="line-clamp-2">{order.notes}</span>
+                                                                        </p>
+                                                                    </div>
+                                                                )}
                                                             </CardContent>
                                                         </Card>
                                                     )}
@@ -221,13 +229,14 @@ export default function OrdersKanban() {
                                                 </div>
                                             )}
                                         </div>
-                                    )}
+                                    )
+                                    }
                                 </Droppable>
                             </div>
                         );
                     })}
-                </div>
-            </DragDropContext>
-        </div>
+                </div >
+            </DragDropContext >
+        </div >
     );
 }

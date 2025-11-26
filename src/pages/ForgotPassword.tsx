@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import { Loader2, Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://restaurent-server-cgxr.onrender.com/api';
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState('');

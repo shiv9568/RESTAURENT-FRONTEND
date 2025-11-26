@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,8 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Save, MapPin, Locate, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { useEffect } from 'react';
-import { restaurantBrandAPI } from '@/utils/api';
+import { restaurantBrandAPI, userAPI } from '@/utils/api';
 
 export default function Settings() {
   const [formData, setFormData] = useState({
@@ -26,6 +25,10 @@ export default function Settings() {
     lat: '',
     lng: '',
   });
+  const [passwordData, setPasswordData] = useState({
+    newPassword: '',
+    confirmPassword: '',
+  });
   const [isClosed, setIsClosed] = useState(false);
   const [detectingLocation, setDetectingLocation] = useState(false);
 
@@ -34,7 +37,7 @@ export default function Settings() {
       try {
         const res = await restaurantBrandAPI.get();
         if (res?.data) setIsClosed(!!res.data.isClosed);
-      } catch {}
+      } catch { }
     })();
   }, []);
 
@@ -80,17 +83,17 @@ export default function Settings() {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
-          
+
           // Reverse geocode to get address
           const response = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
           );
-          
+
           if (!response.ok) throw new Error('Failed to get address');
-          
+
           const data = await response.json();
           const addr = data.address;
-          
+
           // Update form with detected location
           setFormData(prev => ({
             ...prev,
@@ -101,7 +104,7 @@ export default function Settings() {
             lat: latitude.toString(),
             lng: longitude.toString(),
           }));
-          
+
           toast.success('Location detected successfully!');
         } catch (error) {
           console.error('Geocoding error:', error);
@@ -112,7 +115,7 @@ export default function Settings() {
       },
       (error) => {
         setDetectingLocation(false);
-        
+
         let errorMessage = 'Failed to get your location';
         switch (error.code) {
           case error.PERMISSION_DENIED:
@@ -156,10 +159,34 @@ export default function Settings() {
         window.dispatchEvent(new CustomEvent('brandUpdated', { detail: { isClosed: next } }));
         // Also persist to localStorage to trigger cross-tab 'storage' events
         localStorage.setItem('brand_isClosed', JSON.stringify(next));
-      } catch {}
+      } catch { }
       toast.success(next ? 'Restaurant marked as closed' : 'Restaurant marked as open');
     } catch {
       toast.error('Failed to update status');
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    if (passwordData.newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+
+    try {
+      await userAPI.changePassword({
+        newPassword: passwordData.newPassword,
+      });
+      toast.success('Password changed successfully');
+      setPasswordData({
+        newPassword: '',
+        confirmPassword: '',
+      });
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to change password');
     }
   };
 
@@ -347,6 +374,37 @@ export default function Settings() {
               Reset
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Account Settings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="newPassword">New Password</Label>
+            <Input
+              id="newPassword"
+              type="password"
+              placeholder="Enter new password"
+              onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+              value={passwordData.newPassword}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              placeholder="Confirm new password"
+              onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+              value={passwordData.confirmPassword}
+            />
+          </div>
+          <Button onClick={handlePasswordChange}>
+            Change Password
+          </Button>
         </CardContent>
       </Card>
     </div>

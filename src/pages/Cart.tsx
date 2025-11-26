@@ -107,7 +107,9 @@ const Cart = () => {
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [showCoupons, setShowCoupons] = useState(false);
+
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'online'>('cash');
+  const [instructions, setInstructions] = useState('');
 
   // Load user from localStorage
   useEffect(() => {
@@ -280,6 +282,7 @@ const Cart = () => {
       deliveryAddress: addrStr,
       orderType: tableNumber ? 'dine-in' : 'delivery',
       tableNumber: tableNumber || undefined,
+      notes: instructions,
     };
 
     if (paymentMethod === 'cash') {
@@ -403,6 +406,16 @@ const Cart = () => {
               </div>
             </Card>
           ))}
+          {/* Special Instructions */}
+          <div className="mt-4">
+            <label className="block font-medium mb-2">Special Instructions</label>
+            <textarea
+              className="w-full border rounded-lg p-3 min-h-[100px] focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none"
+              placeholder="Add cooking notes or delivery instructions (e.g., 'Less spicy', 'Leave at door')"
+              value={instructions}
+              onChange={(e) => setInstructions(e.target.value)}
+            />
+          </div>
         </div>
 
         {/* Bill Summary */}

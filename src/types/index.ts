@@ -46,13 +46,15 @@ export interface CartItem extends MenuItem {
 
 export interface Order {
   id: string;
+  orderNumber?: string;
   restaurantName: string;
   items: CartItem[];
   total: number;
-  status: 'pending' | 'confirmed' | 'preparing' | 'out-for-delivery' | 'delivered';
+  status: 'pending' | 'confirmed' | 'preparing' | 'out-for-delivery' | 'delivered' | 'cancelled';
   orderedAt: string;
   estimatedTime?: string;
   deliveryAddress?: string;
+  notes?: string;
 }
 
 export interface User {
@@ -146,7 +148,7 @@ export interface AdminOrder extends Order {
   customerName: string;
   customerPhone: string;
   customerEmail: string;
-  paymentMethod: 'cash' | 'card' | 'upi';
+  paymentMethod: 'cash' | 'card' | 'upi' | 'online';
   paymentStatus: 'pending' | 'completed' | 'failed';
   notes?: string;
 }

@@ -5,7 +5,7 @@ import {
   Select,
   SelectContent,
   SelectItem,
-  SelectTrigger,
+  SelectTrigger,  
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -286,6 +286,14 @@ export default function OrdersManagement() {
                         <p className="text-sm font-medium">{order.deliveryAddress || 'N/A'}</p>
                       </div>
                     </div>
+
+                    {/* Order Notes */}
+                    {order.notes && (
+                      <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p className="text-sm font-semibold text-yellow-800 mb-1">📝 Special Instructions</p>
+                        <p className="text-sm text-yellow-700">{order.notes}</p>
+                      </div>
+                    )}
 
                     {/* Items  */}
                     <div className="mb-4">
