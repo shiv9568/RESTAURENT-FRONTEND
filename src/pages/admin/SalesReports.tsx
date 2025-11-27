@@ -11,10 +11,22 @@ import {
     CheckCircle,
     XCircle,
     Loader2,
-    Download
+    Download,
+    RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/utils/api';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface DailySale {
     date: string;
@@ -128,6 +140,21 @@ export default function SalesReports() {
 
     const totals = calculateTotals();
 
+    const handleRebuild = async () => {
+        try {
+            setIsLoading(true);
+            await api.post('/sales/rebuild');
+            toast.success('Sales data rebuilt successfully');
+            loadReports();
+            loadTodayStats();
+        } catch (error: any) {
+            toast.error('Failed to rebuild sales data');
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="space-y-6">
             <div>
@@ -231,6 +258,30 @@ export default function SalesReports() {
                             <Download className="h-4 w-4 mr-2" />
                             Export CSV
                         </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" disabled={isLoading}>
+                                    <RefreshCw className="h-4 w-4 mr-2" />
+                                    Rebuild Data
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Rebuild Sales Data?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This will delete all existing sales records and rebuild them from the current orders in the database.
+                                        <br /><br />
+                                        <strong>Warning:</strong> If you have cleared your orders, this will result in an empty sales history! Only use this if you have existing orders that are not showing up in reports.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleRebuild} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                        Rebuild
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>
                 </CardContent>
             </Card>
