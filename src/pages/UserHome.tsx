@@ -120,7 +120,11 @@ const UserHome: React.FC = () => {
     setAllItems(items);
 
     // Calculate recommendations
-    const orders = JSON.parse(localStorage.getItem('foodie_orders') || '[]');
+    const params = new URLSearchParams(window.location.search);
+    const tableNumber = params.get('table') || localStorage.getItem('tableNumber');
+
+    const ordersKey = tableNumber ? `foodie_orders_${tableNumber}` : 'foodie_orders';
+    const orders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
     setPopularItems(getPopularItems(items));
     setChefsSpecial(getChefsSpecial(items));
     setTrendingItems(getTrendingThisWeek(items, orders));

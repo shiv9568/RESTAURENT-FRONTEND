@@ -2,13 +2,18 @@ import { CartItem } from '@/types';
 
 const CART_KEY = 'foodDeliveryCart';
 
+const getCartKey = () => {
+  const tableNumber = localStorage.getItem('tableNumber');
+  return tableNumber ? `${CART_KEY}_table_${tableNumber}` : CART_KEY;
+};
+
 export const getCart = (): CartItem[] => {
-  const cart = localStorage.getItem(CART_KEY);
+  const cart = localStorage.getItem(getCartKey());
   return cart ? JSON.parse(cart) : [];
 };
 
 export const saveCart = (cart: CartItem[]): void => {
-  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  localStorage.setItem(getCartKey(), JSON.stringify(cart));
 };
 
 export const addToCart = (item: CartItem): void => {
@@ -49,7 +54,7 @@ export const removeFromCart = (itemId: string, selectedPortion?: string): void =
 };
 
 export const clearCart = (): void => {
-  localStorage.removeItem(CART_KEY);
+  localStorage.removeItem(getCartKey());
 };
 
 export const getCartTotal = (): number => {

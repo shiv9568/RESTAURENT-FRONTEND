@@ -36,6 +36,7 @@ import { useEffect } from "react";
 import { initSocket, socket } from "@/utils/socket";
 import { NotificationListener } from "@/components/NotificationListener";
 import ChatWidget from "@/components/ChatWidget";
+import { decodeTableId } from '@/utils/tableId';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -68,7 +69,9 @@ export default function App() {
 
     // Check for table parameter and notify admin
     const searchParams = new URLSearchParams(window.location.search);
-    const tableNumber = searchParams.get('table');
+    const rawTableNumber = searchParams.get('table');
+    const tableNumber = rawTableNumber ? decodeTableId(rawTableNumber) : null;
+
     if (tableNumber) {
       // Wait for socket to be ready
       const checkSocket = setInterval(() => {
@@ -158,7 +161,7 @@ export default function App() {
                       </Routes>
                     </main>
                     {/* <Footer /> */}
-                    
+
                   </div>
                 }
               />

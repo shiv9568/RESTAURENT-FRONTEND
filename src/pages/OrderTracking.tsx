@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { orderAPI, restaurantBrandAPI } from '@/utils/api';
 import { toast } from 'sonner';
+import { encodeTableId } from '@/utils/tableId';
 
 const OrderTracking = () => {
   const { orderId } = useParams();
@@ -14,6 +15,7 @@ const OrderTracking = () => {
   const [brand, setBrand] = useState<any>(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const tableNumber = localStorage.getItem('tableNumber');
 
   const statusSteps = useMemo(() => ([
     { key: 'pending', label: 'Order Placed', icon: CheckCircle2 },
@@ -98,7 +100,7 @@ const OrderTracking = () => {
       <div className="container mx-auto px-4 py-8 min-h-screen">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-2xl font-bold mb-4">Order not found</h1>
-          <Button onClick={() => navigate('/')}>Go Home</Button>
+          <Button onClick={() => navigate(tableNumber ? `/?table=${encodeTableId(tableNumber)}` : '/')}>Go Home</Button>
         </div>
       </div>
     );
@@ -109,7 +111,7 @@ const OrderTracking = () => {
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-3xl font-bold">Track Your Order</h1>
-          <Button variant="outline" onClick={() => navigate(`/invoice/${orderId || order.id}`)}>
+          <Button variant="outline" onClick={() => navigate(`/invoice/${orderId || order.id}${tableNumber ? `?table=${encodeTableId(tableNumber)}` : ''}`)}>
             View Invoice
           </Button>
         </div>
@@ -260,7 +262,7 @@ const OrderTracking = () => {
 
         <div className="mt-8 text-center space-y-4">
           <div className="flex items-center justify-center gap-2">
-            <Button onClick={() => navigate('/')}>Continue Shopping</Button>
+            <Button onClick={() => navigate(tableNumber ? `/?table=${encodeTableId(tableNumber)}` : '/')}>Continue Shopping</Button>
 
             {/* Cancel Order Button - Only show for confirmed or pending orders */}
             {(order.status === 'confirmed' || order.status === 'pending') && (

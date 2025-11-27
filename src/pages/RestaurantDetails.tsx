@@ -7,6 +7,7 @@ import { MenuItem as MenuItemType, CartItem } from '@/types';
 import { toast } from 'sonner';
 import { useEffect, useState } from 'react';
 import { restaurantsAPI, foodItemsAPI } from '@/utils/apiService';
+import { encodeTableId } from '@/utils/tableId';
 
 const RestaurantDetails = () => {
   const { id } = useParams();
@@ -14,6 +15,8 @@ const RestaurantDetails = () => {
   const [restaurant, setRestaurant] = useState<any>(null);
   const [menuItems, setMenuItems] = useState<MenuItemType[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const tableNumber = localStorage.getItem('tableNumber');
 
   useEffect(() => {
     const loadData = async () => {
@@ -60,7 +63,7 @@ const RestaurantDetails = () => {
     return (
       <div className="container mx-auto px-4 py-12 text-center">
         <h1 className="text-2xl font-bold mb-4">Restaurant not found</h1>
-        <Button onClick={() => navigate('/')}>Back to Home</Button>
+        <Button onClick={() => navigate(tableNumber ? `/?table=${encodeTableId(tableNumber)}` : '/')}>Back to Home</Button>
       </div>
     );
   }

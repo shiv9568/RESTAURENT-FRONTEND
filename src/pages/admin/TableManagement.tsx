@@ -21,6 +21,7 @@ import {
 import { Trash2, Plus, QrCode, Printer } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { toast } from 'sonner';
+import { encodeTableId } from '@/utils/tableId';
 
 const TableManagement = () => {
     const [tables, setTables] = useState<TableType[]>([]);
@@ -109,7 +110,7 @@ const TableManagement = () => {
         const printWindow = window.open('', '_blank');
         if (printWindow && selectedTable) {
             const baseUrl = (import.meta.env.VITE_FRONTEND_URL || window.location.origin).replace(/\/$/, '');
-            const qrUrl = `${baseUrl}/?table=${selectedTable.tableNumber}`;
+            const qrUrl = `${baseUrl}/?table=${encodeTableId(selectedTable.tableNumber)}`;
             printWindow.document.write(`
         <html>
           <head>
@@ -246,7 +247,7 @@ const TableManagement = () => {
                                                     <div className="flex flex-col items-center justify-center p-6 space-y-4">
                                                         <div className="bg-white p-4 rounded-lg shadow-sm border">
                                                             <QRCode
-                                                                value={`${(import.meta.env.VITE_FRONTEND_URL || window.location.origin).replace(/\/$/, '')}/?table=${table.tableNumber}`}
+                                                                value={`${(import.meta.env.VITE_FRONTEND_URL || window.location.origin).replace(/\/$/, '')}/?table=${encodeTableId(table.tableNumber)}`}
                                                                 size={200}
                                                             />
                                                         </div>

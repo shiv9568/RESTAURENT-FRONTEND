@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ShoppingCart, User, Search, MapPin, LogOut, Sun, Moon, Users } from 'lucide-react';
+import { ShoppingCart, User, Search, MapPin, LogOut, Sun, Moon, Users, ChevronDown, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import profile from '@/assets/profile.png';
@@ -11,12 +11,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { getCartItemsCount } from '@/utils/cart';
 import { useState, useEffect } from 'react';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 
 import { TableSelectionDialog } from '@/components/TableSelectionDialog';
+
+import { toast } from 'sonner';
+import { encodeTableId, decodeTableId } from '@/utils/tableId';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -77,14 +85,29 @@ const Navbar = () => {
   useEffect(() => {
     // Check for table number in URL
     const params = new URLSearchParams(window.location.search);
-    const table = params.get('table');
+    const rawTableParam = params.get('table');
 
-    if (table) {
+    if (rawTableParam) {
+      const table = decodeTableId(rawTableParam);
+
+      // If the URL parameter wasn't encoded (e.g. legacy link or manual entry), 
+      // or if we just want to ensure it's always encoded in the URL:
+      const encodedTable = encodeTableId(table);
+      if (rawTableParam !== encodedTable) {
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('table', encodedTable);
+        window.history.replaceState({}, '', newUrl);
+      }
+
       localStorage.setItem('tableNumber', table);
       setTableNumber(table);
 
-      // If user name is missing, prompt for it
-      const storedUserName = localStorage.getItem('dineInUserName');
+      // Update cart count for the new table
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new Event('cartUpdated'));
+
+      // If user name is missing for THIS table, prompt for it
+      const storedUserName = localStorage.getItem(`dineInUserName_${table}`);
       if (!storedUserName && !user) {
         setIsTableDialogOpen(true);
       }
@@ -103,7 +126,7 @@ const Navbar = () => {
       window.removeEventListener('storage', updateCartCount);
       window.removeEventListener('cartUpdated', updateCartCount);
     };
-  }, [user]); // Added user dependency to check if logged in
+  }, [user, navigate]); // Added navigate dependency
 
   const updateCartCount = () => {
     setCartCount(getCartItemsCount());
@@ -123,9 +146,29 @@ const Navbar = () => {
 
   const handleTableSelect = (table: string, userName: string) => {
     localStorage.setItem('tableNumber', table);
+    // Scope user name to table
+    localStorage.setItem(`dineInUserName_${table}`, userName);
+    // Also set generic key for backward compatibility or current session
     localStorage.setItem('dineInUserName', userName);
+
     setTableNumber(table);
+
+    // Update URL with encoded table ID
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('table', encodeTableId(table));
+    window.history.pushState({}, '', newUrl);
+
     window.dispatchEvent(new Event('storage'));
+  };
+
+  const handleLeaveTable = () => {
+    if (tableNumber) {
+      localStorage.removeItem('tableNumber');
+      localStorage.removeItem(`dineInUserName_${tableNumber}`);
+      setTableNumber(null);
+      navigate('/');
+      toast.success('You have left the table.');
+    }
   };
 
   return (
@@ -133,7 +176,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to={tableNumber ? `/?table=${encodeTableId(tableNumber)}` : '/'} className="flex items-center space-x-2">
             <img
               src="/logo.jpg"
               alt="D&G Restaurent"
@@ -145,10 +188,28 @@ const Navbar = () => {
           {/* Delivery / Dine-in Toggle */}
           <div className="flex items-center space-x-2">
             {tableNumber ? (
-              <div className="flex items-center h-8 px-3 gap-2 text-xs font-medium border border-primary text-primary bg-primary/5 rounded-md">
-                <span className="text-sm">🍽️</span>
-                Table {tableNumber}
-              </div>
+              <DropdownMenu>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DropdownMenuTrigger asChild>
+                      <div className="flex items-center h-8 px-3 gap-2 text-xs font-medium border border-primary text-primary bg-primary/5 rounded-md cursor-pointer hover:bg-primary/10 transition-colors group">
+                        <span className="text-sm">🍽️</span>
+                        <span className="font-semibold">Table {tableNumber}</span>
+                        <ChevronDown className="w-3 h-3 opacity-50 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </DropdownMenuTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Click to change name or switch table</p>
+                  </TooltipContent>
+                </Tooltip>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setIsTableDialogOpen(true)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Change Name / Table
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Button
                 variant="outline"
@@ -186,7 +247,7 @@ const Navbar = () => {
               variant="ghost"
               size="icon"
               className="relative w-8 h-8 md:w-10 md:h-10"
-              onClick={() => navigate('/cart')}
+              onClick={() => navigate(tableNumber ? `/cart?table=${encodeTableId(tableNumber)}` : '/cart')}
               data-cart-icon
             >
               <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
@@ -258,7 +319,7 @@ const Navbar = () => {
         isOpen={isTableDialogOpen}
         onClose={() => setIsTableDialogOpen(false)}
         onSelect={handleTableSelect}
-        initialUserName={user?.name || localStorage.getItem('dineInUserName') || ''}
+        initialUserName={user?.name || (tableNumber ? localStorage.getItem(`dineInUserName_${tableNumber}`) : localStorage.getItem('dineInUserName')) || ''}
         preselectedTable={tableNumber}
       />
     </nav>

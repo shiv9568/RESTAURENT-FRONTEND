@@ -15,6 +15,7 @@ import { CartItem, Address } from '@/types';
 import { toast } from 'sonner';
 import { userAPI } from '@/utils/api';
 import { EmptyCart } from '@/components/EmptyCart';
+import { encodeTableId } from '@/utils/tableId';
 
 // Coupon interface
 interface Coupon {
@@ -256,7 +257,9 @@ const Cart = () => {
     const phoneNumber = userProfile?.mobile || userProfile?.phone || selectedAddress?.phone || user?.phoneNumbers?.[0]?.phoneNumber || '';
 
     // Get dine-in user name if available
-    const dineInUserName = localStorage.getItem('dineInUserName');
+    const dineInUserName = tableNumber
+      ? localStorage.getItem(`dineInUserName_${tableNumber}`)
+      : localStorage.getItem('dineInUserName');
 
     const orderData = {
       orderNumber: generatedOrderNumber,
@@ -297,6 +300,17 @@ const Cart = () => {
         const response = await orderAPI.create(orderData);
 
         if (response.data) {
+          // Save to local history for recommendations
+          try {
+            const tableNumber = localStorage.getItem('tableNumber');
+            const ordersKey = tableNumber ? `foodie_orders_${tableNumber}` : 'foodie_orders';
+            const orders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
+            orders.push({ ...orderData, ...response.data });
+            localStorage.setItem(ordersKey, JSON.stringify(orders));
+          } catch (e) {
+            console.error('Failed to save local history', e);
+          }
+
           // Clear cart
           localStorage.removeItem('foodie_cart');
           localStorage.removeItem('cart'); // Clear both potential keys
@@ -304,7 +318,7 @@ const Cart = () => {
           window.dispatchEvent(new Event('cartUpdated'));
 
           toast.success('Order placed successfully!');
-          navigate(`/order-tracking/${response.data._id}`);
+          navigate(`/order-tracking/${response.data._id}${tableNumber ? `?table=${encodeTableId(tableNumber)}` : ''}`);
         }
       } catch (error: any) {
         console.error('Order placement failed:', error);
@@ -314,7 +328,7 @@ const Cart = () => {
         setIsPlacingOrder(false);
       }
     } else {
-      navigate('/payment', { state: { orderData } });
+      navigate(tableNumber ? `/payment?table=${encodeTableId(tableNumber)}` : '/payment', { state: { orderData } });
     }
   };
 

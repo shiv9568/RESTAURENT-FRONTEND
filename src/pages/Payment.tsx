@@ -6,6 +6,7 @@ import { Loader2, CreditCard, QrCode } from 'lucide-react';
 import { orderAPI } from '@/utils/api';
 import { toast } from 'sonner';
 import { clearCart } from '@/utils/cart';
+import { encodeTableId } from '@/utils/tableId';
 
 export default function Payment() {
   const location = useLocation() as any;
@@ -16,7 +17,8 @@ export default function Payment() {
 
   useEffect(() => {
     if (!orderData) {
-      navigate('/cart');
+      const tableNumber = localStorage.getItem('tableNumber');
+      navigate(tableNumber ? `/cart?table=${encodeTableId(tableNumber)}` : '/cart');
     }
   }, [orderData, navigate]);
 
@@ -29,6 +31,7 @@ export default function Payment() {
 
       let orderId: string;
       let savedOrder: any = null;
+      const tableNumber = localStorage.getItem('tableNumber');
 
       try {
         console.log('Creating order with data:', orderData);
@@ -38,9 +41,10 @@ export default function Payment() {
         orderId = response.data.id || response.data._id || response.data.orderNumber || orderData.orderNumber;
 
         // Save to localStorage as backup
-        const orders = JSON.parse(localStorage.getItem('foodie_orders') || '[]');
+        const ordersKey = tableNumber ? `foodie_orders_${tableNumber}` : 'foodie_orders';
+        const orders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
         orders.push({ ...orderData, ...savedOrder, id: orderId });
-        localStorage.setItem('foodie_orders', JSON.stringify(orders));
+        localStorage.setItem(ordersKey, JSON.stringify(orders));
         console.log('Order saved to database and localStorage');
       } catch (err: any) {
         console.error('Failed to save order to database:', err);
@@ -51,9 +55,10 @@ export default function Payment() {
         const random = Math.random().toString(36).substring(2, 5).toUpperCase();
         orderId = orderData.orderNumber || `ORD${timestamp}${random}`;
 
-        const orders = JSON.parse(localStorage.getItem('foodie_orders') || '[]');
+        const ordersKey = tableNumber ? `foodie_orders_${tableNumber}` : 'foodie_orders';
+        const orders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
         orders.push({ ...orderData, id: orderId, orderNumber: orderId, createdAt: new Date().toISOString() });
-        localStorage.setItem('foodie_orders', JSON.stringify(orders));
+        localStorage.setItem(ordersKey, JSON.stringify(orders));
         console.log('Order saved to localStorage only (database save failed)');
         toast.warning('Order saved locally. It may not appear in admin panel until database connection is fixed.');
       }
@@ -61,7 +66,7 @@ export default function Payment() {
       clearCart();
       window.dispatchEvent(new Event('storage'));
       toast.success('Payment successful!');
-      navigate(`/order-tracking/${orderId}`);
+      navigate(`/order-tracking/${orderId}${tableNumber ? `?table=${encodeTableId(tableNumber)}` : ''}`);
     } catch (e: any) {
       toast.error('Payment failed, please try again.');
     } finally {
