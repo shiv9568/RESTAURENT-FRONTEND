@@ -18,6 +18,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { socket } from '@/utils/socket';
 
 interface Stats {
   restaurants: { total: number; growth: number };
@@ -65,6 +66,21 @@ export default function Dashboard() {
     };
 
     fetchData();
+
+    // Socket listener for new notifications
+    const handleNewNotification = (notification: NotificationItem) => {
+      setNotifications(prev => [notification, ...prev].slice(0, 5));
+
+      // Play sound
+      const audio = new Audio('/notification.mp3'); // Assuming file is in public folder
+      audio.play().catch(e => console.error('Error playing sound:', e));
+    };
+
+    socket.on('system_notification', handleNewNotification);
+
+    return () => {
+      socket.off('system_notification', handleNewNotification);
+    };
   }, []);
 
   const getNotificationIcon = (type: string) => {
@@ -181,7 +197,7 @@ export default function Dashboard() {
                 activities.map((activity, index) => (
                   <div key={index} className="flex items-start gap-4">
                     <div className={`rounded-full p-1 ${activity.type === 'restaurant' ? 'bg-blue-100' :
-                        activity.type === 'food' ? 'bg-amber-100' : 'bg-green-100'
+                      activity.type === 'food' ? 'bg-amber-100' : 'bg-green-100'
                       }`}>
                       {activity.type === 'restaurant' && <Building className="h-3 w-3 text-blue-600" />}
                       {activity.type === 'food' && <Coffee className="h-3 w-3 text-amber-600" />}
