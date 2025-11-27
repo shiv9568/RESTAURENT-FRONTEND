@@ -19,6 +19,7 @@ import TableManagement from "./pages/admin/TableManagement";
 import SalesReports from "./pages/admin/SalesReports";
 import AdminLogin from "./pages/admin/AdminLogin";
 import SuperAdminDashboard from "./pages/super-admin/SuperAdminDashboard";
+import SuperAdminLogin from "./pages/super-admin/SuperAdminLogin";
 import NotFound from "./pages/NotFound";
 import UserHome from "./pages/UserHome";
 import MyOrders from "./pages/MyOrders";
@@ -37,6 +38,8 @@ import { initSocket, socket } from "@/utils/socket";
 import { NotificationListener } from "@/components/NotificationListener";
 import ChatWidget from "@/components/ChatWidget";
 import { decodeTableId } from '@/utils/tableId';
+import { ServiceRequestButton } from "@/components/ServiceRequestButton";
+import { SessionManager } from "@/components/SessionManager";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -96,12 +99,52 @@ export default function App() {
       if (data.action === 'update' || data.action === 'create') {
         window.dispatchEvent(new Event('orderUpdated'));
       }
+
+
+      socket.on('orders:update', handleOrderUpdate);
+
     };
 
-    socket.on('orders:update', handleOrderUpdate);
+    const handleGlobalError = (event: ErrorEvent) => {
+      fetch(`${import.meta.env.VITE_API_URL}/logs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          level: 'error',
+          message: event.message,
+          details: {
+            filename: event.filename,
+            lineno: event.lineno,
+            colno: event.colno,
+            error: event.error ? event.error.stack : undefined
+          },
+          service: 'frontend'
+        })
+      }).catch(console.error);
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      fetch(`${import.meta.env.VITE_API_URL}/logs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          level: 'error',
+          message: event.reason ? (event.reason.message || event.reason) : 'Unhandled Promise Rejection',
+          details: {
+            reason: event.reason
+          },
+          service: 'frontend'
+        })
+      }).catch(console.error);
+    };
+
+    window.addEventListener('error', handleGlobalError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
 
     return () => {
       socket.off('orders:update', handleOrderUpdate);
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
     };
   }, []);
 
@@ -115,6 +158,7 @@ export default function App() {
             <NotificationListener />
             <Routes>
               {/* Super Admin */}
+              <Route path="/super-admin/login" element={<SuperAdminLogin />} />
               <Route
                 path="/super-admin/*"
                 element={
@@ -153,15 +197,16 @@ export default function App() {
                         <Route path="/my-orders" element={<MyOrders />} />
                         <Route path="/auth" element={<Auth />} />
                         <Route path="/forgot-password" element={<ForgotPassword />} />
-                        <Route path="/secret-admin-setup" element={<SecretSetup />} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/restaurant/:id" element={<RestaurantDetails />} />
                         <Route path="/group-order/:groupId?" element={<GroupOrderPage />} />
+                        <Route path="/secret-admin-setup" element={<SecretSetup />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </main>
                     {/* <Footer /> */}
-
+                    <ServiceRequestButton />
+                    <SessionManager />
                   </div>
                 }
               />

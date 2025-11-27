@@ -110,7 +110,7 @@ const TableManagement = () => {
         const printWindow = window.open('', '_blank');
         if (printWindow && selectedTable) {
             const baseUrl = (import.meta.env.VITE_FRONTEND_URL || window.location.origin).replace(/\/$/, '');
-            const qrUrl = `${baseUrl}/?table=${encodeTableId(selectedTable.tableNumber)}`;
+            const qrUrl = `${baseUrl}/?table=${encodeTableId(selectedTable.tableNumber)}&token=${selectedTable.currentSessionToken || selectedTable._id}`;
             printWindow.document.write(`
         <html>
           <head>
@@ -247,7 +247,7 @@ const TableManagement = () => {
                                                     <div className="flex flex-col items-center justify-center p-6 space-y-4">
                                                         <div className="bg-white p-4 rounded-lg shadow-sm border">
                                                             <QRCode
-                                                                value={`${(import.meta.env.VITE_FRONTEND_URL || window.location.origin).replace(/\/$/, '')}/?table=${encodeTableId(table.tableNumber)}`}
+                                                                value={`${(import.meta.env.VITE_FRONTEND_URL || window.location.origin).replace(/\/$/, '')}/?table=${encodeTableId(table.tableNumber)}&token=${table.currentSessionToken || table._id}`}
                                                                 size={200}
                                                             />
                                                         </div>

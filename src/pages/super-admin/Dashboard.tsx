@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -13,9 +13,82 @@ import {
   Building,
   Coffee,
   Users,
+  Info,
+  CheckCircle,
+  AlertTriangle
 } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+
+interface Stats {
+  restaurants: { total: number; growth: number };
+  foodItems: { total: number; growth: number };
+  users: { total: number; growth: number };
+}
+
+interface ActivityItem {
+  type: 'restaurant' | 'food' | 'user';
+  message: string;
+  time: string;
+}
+
+interface NotificationItem {
+  _id: string;
+  title: string;
+  message: string;
+  type: 'info' | 'warning' | 'error' | 'success';
+  createdAt: string;
+}
 
 export default function Dashboard() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsRes, activitiesRes, notificationsRes] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/super-admin/stats`),
+          fetch(`${import.meta.env.VITE_API_URL}/super-admin/activities`),
+          fetch(`${import.meta.env.VITE_API_URL}/super-admin/notifications`)
+        ]);
+
+        if (statsRes.ok) setStats(await statsRes.json());
+        if (activitiesRes.ok) setActivities(await activitiesRes.json());
+        if (notificationsRes.ok) setNotifications(await notificationsRes.json());
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'warning': return <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />;
+      case 'error': return <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />;
+      case 'success': return <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />;
+      default: return <Bell className="h-5 w-5 text-blue-600 mt-0.5" />;
+    }
+  };
+
+  const getNotificationStyles = (type: string) => {
+    switch (type) {
+      case 'warning': return 'bg-yellow-50 border-yellow-200 text-yellow-800';
+      case 'error': return 'bg-red-50 border-red-200 text-red-800';
+      case 'success': return 'bg-green-50 border-green-200 text-green-800';
+      default: return 'bg-blue-50 border-blue-200 text-blue-800';
+    }
+  };
+
+  if (loading) {
+    return <div className="p-6">Loading dashboard...</div>;
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -35,8 +108,8 @@ export default function Dashboard() {
             <Building className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-gray-500 mt-1">+4 this month</p>
+            <div className="text-2xl font-bold">{stats?.restaurants.total || 0}</div>
+            <p className="text-xs text-gray-500 mt-1">+{stats?.restaurants.growth || 0} this month</p>
           </CardContent>
         </Card>
 
@@ -46,8 +119,8 @@ export default function Dashboard() {
             <Coffee className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">342</div>
-            <p className="text-xs text-gray-500 mt-1">+28 this week</p>
+            <div className="text-2xl font-bold">{stats?.foodItems.total || 0}</div>
+            <p className="text-xs text-gray-500 mt-1">+{stats?.foodItems.growth || 0} this week</p>
           </CardContent>
         </Card>
 
@@ -57,8 +130,8 @@ export default function Dashboard() {
             <Users className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,204</div>
-            <p className="text-xs text-gray-500 mt-1">+156 this month</p>
+            <div className="text-2xl font-bold">{stats?.users.total || 0}</div>
+            <p className="text-xs text-gray-500 mt-1">+{stats?.users.growth || 0} this month</p>
           </CardContent>
         </Card>
       </div>
@@ -104,37 +177,27 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-start gap-4">
-                <div className="rounded-full p-1 bg-blue-100">
-                  <Users className="h-3 w-3 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">
-                    New restaurant registered
-                  </p>
-                  <p className="text-xs text-gray-500">2 hours ago</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="rounded-full p-1 bg-amber-100">
-                  <Coffee className="h-3 w-3 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">15 new menu items added</p>
-                  <p className="text-xs text-gray-500">5 hours ago</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="rounded-full p-1 bg-red-100">
-                  <AlertCircle className="h-3 w-3 text-red-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">
-                    System maintenance completed
-                  </p>
-                  <p className="text-xs text-gray-500">Yesterday</p>
-                </div>
-              </div>
+              {activities.length > 0 ? (
+                activities.map((activity, index) => (
+                  <div key={index} className="flex items-start gap-4">
+                    <div className={`rounded-full p-1 ${activity.type === 'restaurant' ? 'bg-blue-100' :
+                        activity.type === 'food' ? 'bg-amber-100' : 'bg-green-100'
+                      }`}>
+                      {activity.type === 'restaurant' && <Building className="h-3 w-3 text-blue-600" />}
+                      {activity.type === 'food' && <Coffee className="h-3 w-3 text-amber-600" />}
+                      {activity.type === 'user' && <Users className="h-3 w-3 text-green-600" />}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{activity.message}</p>
+                      <p className="text-xs text-gray-500">
+                        {formatDistanceToNow(new Date(activity.time), { addSuffix: true })}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-gray-500">No recent activities</div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -151,38 +214,37 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="p-4 border rounded-lg bg-yellow-50 border-yellow-200">
-              <div className="flex items-start gap-4">
-                <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
-                <div>
-                  <p className="font-medium text-yellow-800">
-                    Scheduled Maintenance
-                  </p>
-                  <p className="text-sm text-yellow-700 mt-1">
-                    System maintenance scheduled for tomorrow at 2:00 AM UTC.
-                    Expected downtime: 30 minutes.
-                  </p>
+            {notifications.length > 0 ? (
+              notifications.map((notification) => (
+                <div
+                  key={notification._id}
+                  className={`p-4 border rounded-lg ${getNotificationStyles(notification.type)}`}
+                >
+                  <div className="flex items-start gap-4">
+                    {getNotificationIcon(notification.type)}
+                    <div>
+                      <p className="font-medium">
+                        {notification.title}
+                      </p>
+                      <p className="text-sm mt-1 opacity-90">
+                        {notification.message}
+                      </p>
+                      <p className="text-xs mt-2 opacity-75">
+                        {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                      </p>
+                    </div>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center text-gray-500 py-4">
+                No active notifications
               </div>
-            </div>
-
-            <div className="p-4 border rounded-lg bg-blue-50 border-blue-200">
-              <div className="flex items-start gap-4">
-                <Bell className="h-5 w-5 text-blue-600 mt-0.5" />
-                <div>
-                  <p className="font-medium text-blue-800">
-                    New Feature Available
-                  </p>
-                  <p className="text-sm text-blue-700 mt-1">
-                    Food Management module has been deployed. You can now manage
-                    all food items across restaurants.
-                  </p>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
     </div>
   );
 }
+

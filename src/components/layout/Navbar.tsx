@@ -77,53 +77,6 @@ const Navbar = () => {
     window.addEventListener('storage', loadUser);
 
     return () => {
-      window.removeEventListener('authChanged', loadUser);
-      window.removeEventListener('storage', loadUser);
-    };
-  }, []);
-
-  useEffect(() => {
-    // Check for table number in URL
-    const params = new URLSearchParams(window.location.search);
-    const rawTableParam = params.get('table');
-
-    if (rawTableParam) {
-      const table = decodeTableId(rawTableParam);
-
-      // If the URL parameter wasn't encoded (e.g. legacy link or manual entry), 
-      // or if we just want to ensure it's always encoded in the URL:
-      const encodedTable = encodeTableId(table);
-      if (rawTableParam !== encodedTable) {
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('table', encodedTable);
-        window.history.replaceState({}, '', newUrl);
-      }
-
-      localStorage.setItem('tableNumber', table);
-      setTableNumber(table);
-
-      // Update cart count for the new table
-      window.dispatchEvent(new Event('storage'));
-      window.dispatchEvent(new Event('cartUpdated'));
-
-      // If user name is missing for THIS table, prompt for it
-      const storedUserName = localStorage.getItem(`dineInUserName_${table}`);
-      if (!storedUserName && !user) {
-        setIsTableDialogOpen(true);
-      }
-    } else {
-      const storedTable = localStorage.getItem('tableNumber');
-      if (storedTable) {
-        setTableNumber(storedTable);
-      }
-    }
-
-    updateCartCount();
-    window.addEventListener('storage', updateCartCount);
-    // Also listen for custom cart update events
-    window.addEventListener('cartUpdated', updateCartCount);
-    return () => {
-      window.removeEventListener('storage', updateCartCount);
       window.removeEventListener('cartUpdated', updateCartCount);
     };
   }, [user, navigate]); // Added navigate dependency
@@ -144,18 +97,25 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const handleTableSelect = (table: string, userName: string) => {
+  const handleTableSelect = (table: string, userName: string, tableToken?: string) => {
     localStorage.setItem('tableNumber', table);
     // Scope user name to table
     localStorage.setItem(`dineInUserName_${table}`, userName);
     // Also set generic key for backward compatibility or current session
     localStorage.setItem('dineInUserName', userName);
 
+    if (tableToken) {
+      localStorage.setItem('tableToken', tableToken);
+    }
+
     setTableNumber(table);
 
-    // Update URL with encoded table ID
+    // Update URL with encoded table ID and token
     const newUrl = new URL(window.location.href);
     newUrl.searchParams.set('table', encodeTableId(table));
+    if (tableToken) {
+      newUrl.searchParams.set('token', tableToken);
+    }
     window.history.pushState({}, '', newUrl);
 
     window.dispatchEvent(new Event('storage'));
@@ -176,7 +136,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to={tableNumber ? `/?table=${encodeTableId(tableNumber)}` : '/'} className="flex items-center space-x-2">
+          <Link to={tableNumber ? `/?table=${encodeTableId(tableNumber)}${localStorage.getItem('tableToken') ? `&token=${localStorage.getItem('tableToken')}` : ''}` : '/'} className="flex items-center space-x-2">
             <img
               src="/logo.jpg"
               alt="D&G Restaurent"
@@ -247,7 +207,7 @@ const Navbar = () => {
               variant="ghost"
               size="icon"
               className="relative w-8 h-8 md:w-10 md:h-10"
-              onClick={() => navigate(tableNumber ? `/cart?table=${encodeTableId(tableNumber)}` : '/cart')}
+              onClick={() => navigate(tableNumber ? `/cart?table=${encodeTableId(tableNumber)}${localStorage.getItem('tableToken') ? `&token=${localStorage.getItem('tableToken')}` : ''}` : '/cart')}
               data-cart-icon
             >
               <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />

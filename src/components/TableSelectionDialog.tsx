@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 interface TableSelectionDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    onSelect: (tableNumber: string, userName: string) => void;
+    onSelect: (tableNumber: string, userName: string, tableToken?: string) => void;
 }
 
 export function TableSelectionDialog({ isOpen, onClose, onSelect, initialUserName = '', preselectedTable }: TableSelectionDialogProps & { initialUserName?: string, preselectedTable?: string | null }) {
@@ -68,7 +68,11 @@ export function TableSelectionDialog({ isOpen, onClose, onSelect, initialUserNam
             return;
         }
 
-        onSelect(table, userName.trim());
+        // Find the table object to get the token (ID)
+        const tableObj = tables.find(t => t.tableNumber === table);
+        const token = tableObj?._id;
+
+        onSelect(table, userName.trim(), token);
         onClose();
     };
 

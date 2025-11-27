@@ -12,7 +12,8 @@ import {
   X,
   Shield,
   Store,
-  Clock
+  Clock,
+  Activity
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -61,6 +62,11 @@ const navigation = [
     name: 'System Settings',
     href: '/super-admin/settings',
     icon: Settings,
+  },
+  {
+    name: 'System Health',
+    href: '/super-admin/system-health',
+    icon: Activity,
   },
 ];
 
