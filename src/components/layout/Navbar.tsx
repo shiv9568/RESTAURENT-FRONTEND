@@ -79,7 +79,24 @@ const Navbar = () => {
     return () => {
       window.removeEventListener('cartUpdated', updateCartCount);
     };
-  }, [user, navigate]); // Added navigate dependency
+  }, [user, navigate]);
+
+  useEffect(() => {
+    // Initialize table number from URL or localStorage
+    const searchParams = new URLSearchParams(window.location.search);
+    const tableParam = searchParams.get('table');
+
+    if (tableParam) {
+      const decoded = decodeTableId(tableParam);
+      setTableNumber(decoded);
+      localStorage.setItem('tableNumber', decoded);
+    } else {
+      const stored = localStorage.getItem('tableNumber');
+      if (stored) {
+        setTableNumber(stored);
+      }
+    }
+  }, []);
 
   const updateCartCount = () => {
     setCartCount(getCartItemsCount());
@@ -154,7 +171,7 @@ const Navbar = () => {
                     <DropdownMenuTrigger asChild>
                       <div className="flex items-center h-8 px-3 gap-2 text-xs font-medium border border-primary text-primary bg-primary/5 rounded-md cursor-pointer hover:bg-primary/10 transition-colors group">
                         <span className="text-sm">🍽️</span>
-                        <span className="font-semibold">Table {tableNumber}</span>
+                        <span className="font-semibold">Table {decodeTableId(tableNumber)}</span>
                         <ChevronDown className="w-3 h-3 opacity-50 group-hover:opacity-100 transition-opacity" />
                       </div>
                     </DropdownMenuTrigger>
