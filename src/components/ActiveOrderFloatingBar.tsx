@@ -42,6 +42,9 @@ export const ActiveOrderFloatingBar = () => {
                 const tableNumber = localStorage.getItem('tableNumber');
                 const activeStatuses = ['pending', 'confirmed', 'preparing', 'out-for-delivery'];
 
+                // Helper to check if ID is valid MongoDB ObjectId
+                const isValidMongoId = (id: string) => /^[a-fA-F0-9]{24}$/.test(id);
+
                 // 1. Check Local Storage (Guest & Recent Local Orders)
                 let localCandidate: OrderSummary | null = null;
                 const ordersKey = tableNumber ? `foodie_orders_${tableNumber}` : 'foodie_orders';
@@ -51,50 +54,74 @@ export const ActiveOrderFloatingBar = () => {
                     const localOrders = JSON.parse(localOrdersRaw);
                     if (Array.isArray(localOrders) && localOrders.length > 0) {
                         const reversedOrders = [...localOrders].reverse();
-                        localCandidate = reversedOrders.find((o: any) =>
-                            activeStatuses.includes(o.status)
-                        ) || null;
+                        // Only consider orders with valid MongoDB IDs
+                        localCandidate = reversedOrders.find((o: any) => {
+                            const orderId = o._id || o.id;
+                            return activeStatuses.includes(o.status) && orderId && isValidMongoId(orderId);
+                        }) || null;
                     }
                 }
 
-                // 2. Check Server (Logged-in User)
+                // 2. Check Server (Logged-in User or Table User)
                 let serverCandidate: OrderSummary | null = null;
                 const userId = getBackendUserId();
-                if (userId) {
-                    try {
-                        const res = await orderAPI.getAll();
-                        if (res.data && Array.isArray(res.data)) {
-                            // Filter for user's active orders
-                            const userOrders = res.data.filter((o: any) => o.userId === userId && activeStatuses.includes(o.status));
-                            // Sort by date descending
-                            userOrders.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-                            if (userOrders.length > 0) {
-                                serverCandidate = userOrders[0];
-                            }
+
+                try {
+                    const res = await orderAPI.getAll();
+                    if (res.data && Array.isArray(res.data)) {
+                        let filteredOrders = res.data.filter((o: any) => activeStatuses.includes(o.status));
+
+                        // Apply table-specific filtering if we have a table number
+                        if (tableNumber) {
+                            // For dine-in: ONLY show orders for THIS specific table
+                            filteredOrders = filteredOrders.filter((o: any) =>
+                                o.orderType === 'dine-in' &&
+                                o.tableNumber === tableNumber
+                            );
+                        } else if (userId) {
+                            // For logged-in delivery users: show their orders (NOT dine-in orders)
+                            filteredOrders = filteredOrders.filter((o: any) =>
+                                o.userId === userId &&
+                                o.orderType !== 'dine-in'
+                            );
+                        } else {
+                            // Guest delivery user - rely only on local storage
+                            filteredOrders = [];
                         }
-                    } catch (err) {
-                        // Ignore server error, fallback to local
+
+                        // Sort by date descending
+                        filteredOrders.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                        if (filteredOrders.length > 0) {
+                            serverCandidate = filteredOrders[0];
+                        }
                     }
+                } catch (err) {
+                    // Ignore server error, fallback to local
                 }
 
                 // 3. Determine Best Candidate
-                let finalOrder = serverCandidate || localCandidate;
+                let finalOrder: OrderSummary | null = null;
 
-                // If we have a local candidate, we should verify its status from API if possible
-                if (!serverCandidate && localCandidate) {
+                // Prefer server candidate as it's most up-to-date
+                if (serverCandidate) {
+                    finalOrder = serverCandidate;
+                } else if (localCandidate) {
+                    // Verify local candidate with server before showing
                     const orderId = localCandidate._id || localCandidate.id;
-                    if (orderId) {
+                    if (orderId && isValidMongoId(orderId)) {
                         try {
                             const res = await orderAPI.getById(orderId);
                             const serverOrder = res.data;
-                            if (activeStatuses.includes(serverOrder.status)) {
+                            if (serverOrder && activeStatuses.includes(serverOrder.status)) {
+                                // Use server version as it's authoritative
                                 finalOrder = serverOrder;
-                            } else {
-                                finalOrder = null; // It's actually delivered/cancelled
                             }
-                        } catch {
-                            // Keep local candidate if API fails
-                            finalOrder = localCandidate;
+                            // If server says delivered/cancelled, don't show
+                        } catch (error) {
+                            // If server can't find it, don't show the order
+                            // This prevents showing stale/invalid orders
+                            console.warn('Could not verify order with server:', orderId);
+                            finalOrder = null;
                         }
                     }
                 }
@@ -133,6 +160,11 @@ export const ActiveOrderFloatingBar = () => {
 
     const handleViewOrder = () => {
         const orderId = activeOrder._id || activeOrder.id;
+        // Extra validation - should never happen since we validate upstream, but be defensive
+        if (!orderId || !/^[a-fA-F0-9]{24}$/.test(orderId)) {
+            console.error('Invalid order ID, cannot navigate:', orderId);
+            return;
+        }
         navigate(`/order-tracking/${orderId}${tableNumber ? `?table=${encodeTableId(tableNumber)}` : ''}`);
     };
 
