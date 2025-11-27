@@ -38,8 +38,8 @@ import { initSocket, socket } from "@/utils/socket";
 import { NotificationListener } from "@/components/NotificationListener";
 import ChatWidget from "@/components/ChatWidget";
 import { decodeTableId } from '@/utils/tableId';
-import { ServiceRequestButton } from "@/components/ServiceRequestButton";
 import { SessionManager } from "@/components/SessionManager";
+import { ActiveOrderFloatingBar } from "@/components/ActiveOrderFloatingBar";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -205,8 +205,8 @@ export default function App() {
                       </Routes>
                     </main>
                     {/* <Footer /> */}
-                    <ServiceRequestButton />
                     <SessionManager />
+                    <ActiveOrderFloatingBar />
                   </div>
                 }
               />
