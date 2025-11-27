@@ -30,13 +30,17 @@ export default function Settings() {
     confirmPassword: '',
   });
   const [isClosed, setIsClosed] = useState(false);
+  const [isCouponsEnabled, setIsCouponsEnabled] = useState(true);
   const [detectingLocation, setDetectingLocation] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
         const res = await restaurantBrandAPI.get();
-        if (res?.data) setIsClosed(!!res.data.isClosed);
+        if (res?.data) {
+          setIsClosed(!!res.data.isClosed);
+          setIsCouponsEnabled(res.data.isCouponsEnabled !== false); // Default to true if undefined
+        }
       } catch { }
     })();
   }, []);
@@ -166,6 +170,22 @@ export default function Settings() {
     }
   };
 
+  const toggleCoupons = async () => {
+    try {
+      const next = !isCouponsEnabled;
+      setIsCouponsEnabled(next);
+      await restaurantBrandAPI.upsert({ isCouponsEnabled: next });
+      // Notify other tabs/components
+      try {
+        window.dispatchEvent(new CustomEvent('brandUpdated', { detail: { isCouponsEnabled: next } }));
+        localStorage.setItem('brand_isCouponsEnabled', JSON.stringify(next));
+      } catch { }
+      toast.success(next ? 'Coupons enabled' : 'Coupons disabled');
+    } catch {
+      toast.error('Failed to update coupon settings');
+    }
+  };
+
   const handlePasswordChange = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast.error('New passwords do not match');
@@ -209,6 +229,16 @@ export default function Settings() {
             </div>
             <Button variant={isClosed ? 'outline' : 'default'} onClick={toggleClosed}>
               {isClosed ? 'Mark Open' : 'Mark Closed'}
+            </Button>
+          </div>
+
+          <div className="flex items-center justify-between p-3 border rounded-md bg-muted/30">
+            <div>
+              <div className="font-medium">Coupons & Offers</div>
+              <div className="text-sm text-muted-foreground">{isCouponsEnabled ? 'Coupons section is visible in cart.' : 'Coupons section is hidden.'}</div>
+            </div>
+            <Button variant={isCouponsEnabled ? 'default' : 'outline'} onClick={toggleCoupons}>
+              {isCouponsEnabled ? 'Disable' : 'Enable'}
             </Button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -77,7 +77,8 @@ const Navbar = () => {
     window.addEventListener('storage', loadUser);
 
     return () => {
-      window.removeEventListener('cartUpdated', updateCartCount);
+      window.removeEventListener('authChanged', loadUser);
+      window.removeEventListener('storage', loadUser);
     };
   }, [user, navigate]);
 
@@ -101,6 +102,18 @@ const Navbar = () => {
   const updateCartCount = () => {
     setCartCount(getCartItemsCount());
   };
+
+  useEffect(() => {
+    updateCartCount();
+    window.addEventListener('cartUpdated', updateCartCount);
+    // Also listen for storage events in case cart is updated in another tab
+    window.addEventListener('storage', updateCartCount);
+
+    return () => {
+      window.removeEventListener('cartUpdated', updateCartCount);
+      window.removeEventListener('storage', updateCartCount);
+    };
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');

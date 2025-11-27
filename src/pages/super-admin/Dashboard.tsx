@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from '@/components/ui/sonner';
 import {
   Card,
   CardContent,
@@ -74,6 +75,15 @@ export default function Dashboard() {
       // Play sound
       const audio = new Audio('/notification.mp3'); // Assuming file is in public folder
       audio.play().catch(e => console.error('Error playing sound:', e));
+
+      // Show toast notification
+      toast(notification.title, {
+        description: notification.message,
+        action: {
+          label: 'Dismiss',
+          onClick: () => console.log('Dismissed')
+        },
+      });
     };
 
     socket.on('system_notification', handleNewNotification);

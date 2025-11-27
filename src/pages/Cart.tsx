@@ -13,7 +13,7 @@ import {
 } from '@/utils/cart';
 import { CartItem, Address } from '@/types';
 import { toast } from 'sonner';
-import { userAPI } from '@/utils/api';
+import { userAPI, restaurantBrandAPI } from '@/utils/api';
 import { EmptyCart } from '@/components/EmptyCart';
 import { encodeTableId } from '@/utils/tableId';
 
@@ -108,6 +108,10 @@ const Cart = () => {
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [showCoupons, setShowCoupons] = useState(false);
+  const [isCouponsEnabled, setIsCouponsEnabled] = useState(() => {
+    const stored = localStorage.getItem('brand_isCouponsEnabled');
+    return stored ? JSON.parse(stored) : true;
+  });
 
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'online'>('cash');
   const [instructions, setInstructions] = useState('');
@@ -143,6 +147,29 @@ const Cart = () => {
         .then(res => setUserProfile(res.data))
         .catch(() => { });
     }
+
+    // Load restaurant settings
+    const loadSettings = async () => {
+      try {
+        const res = await restaurantBrandAPI.get();
+        if (res?.data && typeof res.data.isCouponsEnabled === 'boolean') {
+          setIsCouponsEnabled(res.data.isCouponsEnabled);
+        }
+      } catch { }
+    };
+    loadSettings();
+
+    // Listen for real-time updates
+    const handleBrandUpdate = (e: CustomEvent) => {
+      if (e.detail && typeof e.detail.isCouponsEnabled !== 'undefined') {
+        setIsCouponsEnabled(e.detail.isCouponsEnabled);
+      }
+    };
+    window.addEventListener('brandUpdated', handleBrandUpdate as EventListener);
+
+    return () => {
+      window.removeEventListener('brandUpdated', handleBrandUpdate as EventListener);
+    };
   }, [userKey, isSignedIn]);
 
   const handleQuantityChange = (itemId: string, newQuantity: number, selectedPortion?: string) => {
@@ -448,86 +475,88 @@ const Cart = () => {
             <h2 className="text-xl font-bold mb-4">Bill Summary</h2>
 
             {/* Coupon Section */}
-            <div className="mb-4 pb-4 border-b">
-              <div className="flex items-center gap-2 mb-2">
-                <Tag className="w-4 h-4 text-primary" />
-                <span className="font-medium text-sm">Apply Coupon</span>
-              </div>
+            {isCouponsEnabled && (
+              <div className="mb-4 pb-4 border-b">
+                <div className="flex items-center gap-2 mb-2">
+                  <Tag className="w-4 h-4 text-primary" />
+                  <span className="font-medium text-sm">Apply Coupon</span>
+                </div>
 
-              {appliedCoupon ? (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-bold text-green-700">{appliedCoupon.code}</div>
-                      <div className="text-xs text-green-600">
-                        Saved ₹{discount}!
+                {appliedCoupon ? (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-bold text-green-700">{appliedCoupon.code}</div>
+                        <div className="text-xs text-green-600">
+                          Saved ₹{discount}!
+                        </div>
                       </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleRemoveCoupon}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex gap-2 mb-2">
+                      <Input
+                        placeholder="Enter coupon code"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        className="text-sm"
+                      />
+                      <Button size="sm" onClick={handleApplyCoupon}>
+                        Apply
+                      </Button>
                     </div>
                     <Button
+                      variant="link"
                       size="sm"
-                      variant="ghost"
-                      onClick={handleRemoveCoupon}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-xs p-0 h-auto text-primary"
+                      onClick={() => setShowCoupons(!showCoupons)}
                     >
-                      <X className="w-4 h-4" />
+                      {showCoupons ? 'Hide' : 'View'} available coupons
                     </Button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="flex gap-2 mb-2">
-                    <Input
-                      placeholder="Enter coupon code"
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                      className="text-sm"
-                    />
-                    <Button size="sm" onClick={handleApplyCoupon}>
-                      Apply
-                    </Button>
-                  </div>
-                  <Button
-                    variant="link"
-                    size="sm"
-                    className="text-xs p-0 h-auto text-primary"
-                    onClick={() => setShowCoupons(!showCoupons)}
-                  >
-                    {showCoupons ? 'Hide' : 'View'} available coupons
-                  </Button>
 
-                  {showCoupons && (
-                    <div className="mt-3 space-y-2 max-h-48 overflow-y-auto">
-                      {AVAILABLE_COUPONS.map((coupon) => (
-                        <div
-                          key={coupon.code}
-                          className="border rounded-lg p-2 cursor-pointer hover:border-primary transition-colors"
-                          onClick={() => {
-                            if (total < coupon.minOrder) {
-                              toast.error(`Minimum order of ₹${coupon.minOrder} required for this coupon`);
-                              return;
-                            }
-                            setAppliedCoupon(coupon);
-                            setCouponCode(coupon.code);
-                            toast.success(`Coupon "${coupon.code}" applied successfully!`);
-                            setShowCoupons(false);
-                          }}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="font-bold text-xs text-primary">{coupon.code}</div>
-                            <Button size="sm" variant="ghost" className="text-xs h-6 px-2" onClick={(e) => e.stopPropagation()}>
-                              Apply
-                            </Button>
+                    {showCoupons && (
+                      <div className="mt-3 space-y-2 max-h-48 overflow-y-auto">
+                        {AVAILABLE_COUPONS.map((coupon) => (
+                          <div
+                            key={coupon.code}
+                            className="border rounded-lg p-2 cursor-pointer hover:border-primary transition-colors"
+                            onClick={() => {
+                              if (total < coupon.minOrder) {
+                                toast.error(`Minimum order of ₹${coupon.minOrder} required for this coupon`);
+                                return;
+                              }
+                              setAppliedCoupon(coupon);
+                              setCouponCode(coupon.code);
+                              toast.success(`Coupon "${coupon.code}" applied successfully!`);
+                              setShowCoupons(false);
+                            }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="font-bold text-xs text-primary">{coupon.code}</div>
+                              <Button size="sm" variant="ghost" className="text-xs h-6 px-2" onClick={(e) => e.stopPropagation()}>
+                                Apply
+                              </Button>
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {coupon.description}
+                            </div>
                           </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {coupon.description}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
 
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">

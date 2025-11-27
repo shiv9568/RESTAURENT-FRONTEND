@@ -14,6 +14,7 @@ export const getCart = (): CartItem[] => {
 
 export const saveCart = (cart: CartItem[]): void => {
   localStorage.setItem(getCartKey(), JSON.stringify(cart));
+  window.dispatchEvent(new Event('cartUpdated'));
 };
 
 export const addToCart = (item: CartItem): void => {
@@ -55,6 +56,7 @@ export const removeFromCart = (itemId: string, selectedPortion?: string): void =
 
 export const clearCart = (): void => {
   localStorage.removeItem(getCartKey());
+  window.dispatchEvent(new Event('cartUpdated'));
 };
 
 export const getCartTotal = (): number => {
