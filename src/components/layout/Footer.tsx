@@ -10,7 +10,7 @@ const Footer = () => {
       try {
         const res = await restaurantBrandAPI.get();
         setBrand(res.data || null);
-      } catch {}
+      } catch { }
     })();
   }, []);
 
@@ -53,24 +53,16 @@ const Footer = () => {
             <h3 className="font-semibold mb-4">Company</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">
-                  About Us
-                </Link>
+                <span className="text-muted-foreground cursor-not-allowed opacity-70">About Us</span>
               </li>
               <li>
-                <Link to="/careers" className="text-muted-foreground hover:text-primary transition-colors">
-                  Careers
-                </Link>
+                <span className="text-muted-foreground cursor-not-allowed opacity-70">Careers</span>
               </li>
               <li>
-                <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors">
-                  Contact Us
-                </Link>
+                <span className="text-muted-foreground cursor-not-allowed opacity-70">Contact Us</span>
               </li>
               <li>
-                <Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors">
-                  Blog
-                </Link>
+                <span className="text-muted-foreground cursor-not-allowed opacity-70">Blog</span>
               </li>
             </ul>
           </div>
@@ -80,24 +72,16 @@ const Footer = () => {
             <h3 className="font-semibold mb-4">Support</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/help" className="text-muted-foreground hover:text-primary transition-colors">
-                  Help Center
-                </Link>
+                <span className="text-muted-foreground cursor-not-allowed opacity-70">Help Center</span>
               </li>
               <li>
-                <Link to="/safety" className="text-muted-foreground hover:text-primary transition-colors">
-                  Safety
-                </Link>
+                <span className="text-muted-foreground cursor-not-allowed opacity-70">Safety</span>
               </li>
               <li>
-                <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">
-                  Terms & Conditions
-                </Link>
+                <span className="text-muted-foreground cursor-not-allowed opacity-70">Terms & Conditions</span>
               </li>
               <li>
-                <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
-                  Privacy Policy
-                </Link>
+                <span className="text-muted-foreground cursor-not-allowed opacity-70">Privacy Policy</span>
               </li>
             </ul>
           </div>
